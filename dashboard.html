@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blowva — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --green: #00B859;
+  --green-light: #E8F9EF;
+  --green-border: rgba(0,184,89,0.22);
+  --black: #080F09;
+  --white: #FFFFFF;
+  --off: #F6FAF7;
+  --muted: #5A7360;
+  --muted2: #93AE99;
+  --border: #DFF0E5;
+  --border2: #C8E4D0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--off);
+  color:var(--black);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* NAV */
+nav{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  height:60px;
+  position:sticky;top:0;z-index:100;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.logo-icon{
+  width:32px;height:32px;background:var(--green);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+}
+.logo-arrow{
+  width:0;height:0;
+  border-top:5px solid transparent;
+  border-bottom:5px solid transparent;
+  border-left:10px solid #fff;
+  margin-left:2px;
+}
+.logo-text{font-size:1.15rem;font-weight:800;color:var(--black);letter-spacing:-.5px;}
+.logo-text span{color:var(--green);}
+
+.nav-right{display:flex;align-items:center;gap:1rem;}
+.user-pill{
+  display:flex;align-items:center;gap:8px;
+  background:var(--off);border:1px solid var(--border);
+  border-radius:999px;padding:4px 12px 4px 4px;
+}
+.user-av{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--green);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;
+}
+.user-name{font-size:0.82rem;font-weight:600;color:var(--black);}
+.btn-logout{
+  font-size:0.8rem;color:var(--muted);
+  background:none;border:none;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-weight:500;transition:color 0.2s;
+}
+.btn-logout:hover{color:var(--black);}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 60px);}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--white);
+  border-right:1px solid var(--border);
+  padding:1.5rem 1rem;
+  display:flex;flex-direction:column;gap:4px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:0.65rem 0.85rem;border-radius:10px;
+  font-size:0.875rem;font-weight:500;color:var(--muted);
+  cursor:pointer;transition:background 0.15s,color 0.15s;
+  text-decoration:none;
+}
+.nav-item:hover{background:var(--off);color:var(--black);}
+.nav-item.active{background:var(--green-light);color:var(--green);font-weight:700;}
+.nav-item .icon{font-size:16px;flex-shrink:0;}
+.sidebar-bottom{margin-top:auto;}
+.sidebar-badge{
+  background:var(--green-light);border:1px solid var(--green-border);
+  border-radius:12px;padding:0.85rem;margin-top:1rem;
+}
+.sb-title{font-size:0.78rem;font-weight:700;color:var(--green);margin-bottom:3px;}
+.sb-text{font-size:0.72rem;color:var(--muted);line-height:1.5;}
+
+/* MAIN */
+.main{flex:1;padding:2rem;overflow-x:hidden;}
+
+/* WELCOME */
+.welcome{margin-bottom:1.75rem;}
+.welcome h1{
+  font-size:1.4rem;font-weight:800;
+  color:var(--black);margin-bottom:3px;
+}
+.welcome p{font-size:0.88rem;color:var(--muted);}
+
+/* STATS */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;margin-bottom:1.75rem;
+}
+.stat-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.1rem;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+.stat-card:hover{border-color:var(--green-border);box-shadow:0 2px 12px rgba(0,184,89,0.07);}
+.stat-label{font-size:0.72rem;color:var(--muted);font-weight:500;margin-bottom:6px;}
+.stat-val{font-size:1.7rem;font-weight:800;color:var(--black);line-height:1;}
+.stat-change{font-size:0.7rem;color:var(--green);font-weight:600;margin-top:4px;}
+.stat-change.grey{color:var(--muted2);}
+
+/* SECTION TITLE */
+.sec-title{
+  font-size:1rem;font-weight:800;
+  color:var(--black);margin-bottom:1rem;
+}
+
+/* QUICK ACTIONS */
+.quick-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px;margin-bottom:1.75rem;
+}
+.quick-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.25rem;
+  cursor:pointer;transition:all 0.2s;
+  display:flex;flex-direction:column;gap:8px;
+}
+.quick-card:hover{
+  border-color:var(--green);
+  box-shadow:0 4px 20px rgba(0,184,89,0.1);
+  transform:translateY(-2px);
+}
+.quick-icon{
+  width:40px;height:40px;border-radius:10px;
+  background:var(--green-light);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+}
+.quick-title{font-size:0.88rem;font-weight:700;color:var(--black);}
+.quick-sub{font-size:0.76rem;color:var(--muted);line-height:1.5;}
+
+/* AI CAPTION BOX */
+.ai-box{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:16px;padding:1.5rem;
+  margin-bottom:1.75rem;
+}
+.ai-box-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:1.1rem;
+}
+.ai-badge{
+  background:var(--green);color:#fff;
+  font-size:0.65rem;font-weight:800;
+  padding:3px 8px;border-radius:999px;letter-spacing:0.5px;
+}
+.ai-box-title{font-size:0.95rem;font-weight:800;color:var(--black);}
+.ai-input-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.ai-input{
+  flex:1;min-width:200px;
+  padding:0.75rem 1rem;
+  border:1.5px solid var(--border2);
+  border-radius:10px;font-size:0.88rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--black);outline:none;
+  transition:border-color 0.2s;
+}
+.ai-input:focus{border-color:var(--green);}
+.ai-input::placeholder{color:var(--muted2);}
+.btn-generate{
+  background:var(--green);color:#fff;border:none;
+  padding:0.75rem 1.5rem;border-radius:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.88rem;font-weight:700;cursor:pointer;
+  transition:opacity 0.2s,transform 0.15s;
+  white-space:nowrap;
+}
+.btn-generate:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-generate:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+.ai-result{
+  background:var(--off);border:1px solid var(--border);
+  border-radius:10px;padding:1rem;
+  display:none;
+}
+.ai-result.show{display:block;}
+.ai-result-label{
+  font-size:0.68rem;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;
+}
+.ai-caption-text{
+  font-size:0.88rem;color:var(--black);
+  line-height:1.7;margin-bottom:10px;
+}
+.ai-hashtags{
+  font-size:0.82rem;color:var(--green);
+  font-weight:600;line-height:1.8;
+}
+.copy-btn{
+  background:var(--white);border:1px solid var(--border2);
+  color:var(--muted);padding:5px 14px;border-radius:7px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.75rem;font-weight:600;cursor:pointer;
+  margin-top:8px;transition:all 0.15s;
+}
+.copy-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* CONNECT PLATFORMS */
+.platforms-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;margin-bottom:1.75rem;
+}
+.plat-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:1.1rem;
+  display:flex;align-items:center;gap:12px;
+  transition:border-color 0.2s;
+}
+.plat-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.plat-name{font-size:0.85rem;font-weight:700;color:var(--black);}
+.plat-status{font-size:0.72rem;color:var(--muted2);margin-top:1px;}
+.btn-connect{
+  margin-left:auto;
+  background:var(--green-light);color:var(--green);
+  border:1px solid var(--green-border);
+  padding:4px 12px;border-radius:7px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.72rem;font-weight:700;cursor:pointer;
+  transition:background 0.15s;white-space:nowrap;
+}
+.btn-connect:hover{background:var(--green);color:#fff;}
+
+/* LOADING */
+.loading{
+  position:fixed;inset:0;background:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  z-index:999;flex-direction:column;gap:12px;
+}
+.loading-icon{
+  width:52px;height:52px;background:var(--green);
+  border-radius:14px;display:flex;align-items:center;justify-content:center;
+  animation:pulse 1.5s infinite;
+}
+.loading-icon .arr{
+  width:0;height:0;
+  border-top:8px solid transparent;
+  border-bottom:8px solid transparent;
+  border-left:14px solid #fff;
+  margin-left:3px;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.loading-text{font-size:0.85rem;color:var(--muted);font-weight:500;}
+
+/* MOBILE */
+@media(max-width:700px){
+  .sidebar{display:none;}
+  .main{padding:1.25rem;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .quick-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loading">
+  <div class="loading-icon"><div class="arr"></div></div>
+  <div class="loading-text">Loading your dashboard...</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-icon"><div class="logo-arrow"></div></div>
+    <div class="logo-text">Blow<span>va</span></div>
+  </a>
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="user-av" id="user-av">?</div>
+      <div class="user-name" id="user-name">Loading...</div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Log out</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a class="nav-item active" href="dashboard.html">
+      <span class="icon">📊</span> Dashboard
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">⚡</span> Post video
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">✍️</span> AI captions
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">💡</span> Suggestions
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">📈</span> Analytics
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">🔗</span> Accounts
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">⚙️</span> Settings
+    </a>
+    <div class="sidebar-bottom">
+      <div class="sidebar-badge">
+        <div class="sb-title">🚀 Free plan</div>
+        <div class="sb-text">5 AI posts/month. Upgrade to blow up faster.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- WELCOME -->
+    <div class="welcome">
+      <h1>Welcome to Blowva, <span id="welcome-name" style="color:var(--green)">Creator</span> 👋</h1>
+      <p>Here is your growth overview. Connect your social accounts to get started.</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total views</div>
+        <div class="stat-val">0</div>
+        <div class="stat-change grey">Connect accounts to track</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Followers gained</div>
+        <div class="stat-val">0</div>
+        <div class="stat-change grey">Connect accounts to track</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Posts published</div>
+        <div class="stat-val">0</div>
+        <div class="stat-change grey">No posts yet</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Viral score</div>
+        <div class="stat-val" style="color:var(--green)">—</div>
+        <div class="stat-change grey">Post a video to get score</div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="sec-title">Quick actions</div>
+    <div class="quick-grid">
+      <div class="quick-card" onclick="alert('Video upload coming soon! We are building this next.')">
+        <div class="quick-icon">🎬</div>
+        <div class="quick-title">Upload a video</div>
+        <div class="quick-sub">Post to TikTok, Instagram & Facebook automatically</div>
+      </div>
+      <div class="quick-card" onclick="document.getElementById('ai-section').scrollIntoView({behavior:'smooth'})">
+        <div class="quick-icon">✍️</div>
+        <div class="quick-title">Generate AI caption</div>
+        <div class="quick-sub">Get a scroll-stopping caption and hashtags instantly</div>
+      </div>
+      <div class="quick-card" onclick="document.getElementById('platforms-section').scrollIntoView({behavior:'smooth'})">
+        <div class="quick-icon">🔗</div>
+        <div class="quick-title">Connect accounts</div>
+        <div class="quick-sub">Link your TikTok, Instagram and Facebook</div>
+      </div>
+      <div class="quick-card" onclick="alert('Content suggestions coming soon! Keep posting and Blowva learns your niche.')">
+        <div class="quick-icon">💡</div>
+        <div class="quick-title">Content suggestions</div>
+        <div class="quick-sub">See what videos to make next for your niche</div>
+      </div>
+    </div>
+
+    <!-- AI CAPTION GENERATOR -->
+    <div class="ai-box" id="ai-section">
+      <div class="ai-box-header">
+        <div class="ai-badge">AI</div>
+        <div class="ai-box-title">Generate caption & hashtags</div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-input" id="video-desc" placeholder="Describe your video e.g. 'Comedy skit about Lagos traffic jams'">
+        <button class="btn-generate" id="gen-btn" onclick="generateCaption()">Generate →</button>
+      </div>
+      <div class="ai-result" id="ai-result">
+        <div class="ai-result-label">Your AI caption</div>
+        <div class="ai-caption-text" id="caption-text"></div>
+        <div class="ai-result-label" style="margin-top:10px">Hashtags</div>
+        <div class="ai-hashtags" id="hashtag-text"></div>
+        <button class="copy-btn" onclick="copyCaption()">Copy caption + hashtags</button>
+      </div>
+    </div>
+
+    <!-- CONNECT PLATFORMS -->
+    <div class="sec-title" id="platforms-section">Connect your social accounts</div>
+    <div class="platforms-grid">
+      <div class="plat-card">
+        <div class="plat-icon" style="background:#fff0f3">🎵</div>
+        <div>
+          <div class="plat-name">TikTok</div>
+          <div class="plat-status">Not connected</div>
+        </div>
+        <button class="btn-connect" onclick="alert('TikTok connection coming soon! We are applying for TikTok API access.')">Connect</button>
+      </div>
+      <div class="plat-card">
+        <div class="plat-icon" style="background:#fff0f8">📸</div>
+        <div>
+          <div class="plat-name">Instagram</div>
+          <div class="plat-status">Not connected</div>
+        </div>
+        <button class="btn-connect" onclick="alert('Instagram connection coming soon!')">Connect</button>
+      </div>
+      <div class="plat-card">
+        <div class="plat-icon" style="background:#f0f4ff">👤</div>
+        <div>
+          <div class="plat-name">Facebook</div>
+          <div class="plat-status">Not connected</div>
+        </div>
+        <button class="btn-connect" onclick="alert('Facebook connection coming soon!')">Connect</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Check auth on load
+sbClient.auth.getSession().then(({ data }) => {
+  if (!data.session) {
+    window.location.href = 'login.html';
+    return;
+  }
+  const user = data.session.user;
+  const name = user.user_metadata?.full_name || user.email.split('@')[0];
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+
+  document.getElementById('user-av').textContent = initials;
+  document.getElementById('user-name').textContent = name.split(' ')[0];
+  document.getElementById('welcome-name').textContent = name.split(' ')[0];
+  document.getElementById('loading').style.display = 'none';
+});
+
+async function logout() {
+  await sbClient.auth.signOut();
+  window.location.href = 'login.html';
+}
+
+// AI Caption generator using predefined responses (no API key needed yet)
+const captions = {
+  default: [
+    { caption: "POV: You just found the secret to going viral as a Nigerian creator 🚀\n\nThis is exactly what nobody is telling you — and it's changing everything.", hashtags: "#NigerianCreator #ContentCreator #GoViral #Naija #TikTokNigeria #InstagramNigeria #CreatorTips" },
+    { caption: "Wait until you see this 👀\n\nAs a Nigerian creator, this is the kind of content that changes everything. Save this before it disappears.", hashtags: "#Nigeria #NaijaContent #ContentCreation #Viral #CreatorLife #AfricanCreator #Blowva" },
+    { caption: "Nobody in Nigeria is talking about this and I don't understand why 🤔\n\nThis alone can change your content game completely. Watch till the end.", hashtags: "#NigerianTikTok #NaijaCreator #GoViral #ContentStrategy #AfricaCreators #TikTokNaija" }
+  ],
+  comedy: [
+    { caption: "Lagos people will understand this immediately 😂😂😂\n\nTag someone who has been in this situation before! This one too real abeg.", hashtags: "#LagosSkit #NigerianComedy #NaijaHumor #Skit #FunnyNigeria #AfricanComedy #Comedy" },
+    { caption: "I cannot stop laughing at this 😭💀\n\nNigerian parents when you make a small mistake vs when they make the same mistake. The accuracy is too much.", hashtags: "#NigerianParents #NaijaComedy #RelatableNigeria #Skit #FunnyVideo #NigerianSkits #Comedy" }
+  ],
+  food: [
+    { caption: "This is the recipe my Nigerian grandmother never wanted to share 🍲❤️\n\nFinally got her to show me and I had to share with you. Save this now.", hashtags: "#NigerianFood #AfricanFood #FoodTok #NaijaChef #NigerianRecipe #AfricanCuisine #FoodLovers" },
+    { caption: "POV: You cooked jollof rice that hit different today 🍛🔥\n\nNigerian jollof no dey ever fail. This is how we do it in my house.", hashtags: "#JollofRice #NigerianFood #FoodTok #AfricanFood #NaijaFood #Cooking #FoodLovers" }
+  ],
+  fashion: [
+    { caption: "Nigerian fashion is taking over and this is proof 👗✨\n\nAfro-fusion at its finest. Comment 'YES' if you want the full outfit details.", hashtags: "#NigerianFashion #AfricanFashion #Ootd #NaijaStyle #AfroFusion #FashionTok #StyleInspo" },
+    { caption: "This outfit has Lagos written all over it 🔥\n\nWhen you mix tradition with modern and it just works. The ancestors are pleased.", hashtags: "#NigerianStyle #LagosStyle #AfricanWear #FashionNigeria #Ootd #AfroFashion #NaijaFashion" }
+  ]
+};
+
+function generateCaption() {
+  const desc = document.getElementById('video-desc').value.trim();
+  if (!desc) {
+    document.getElementById('video-desc').style.borderColor = '#EF4444';
+    setTimeout(() => document.getElementById('video-desc').style.borderColor = '', 2000);
+    return;
+  }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  // Detect niche from description
+  const lower = desc.toLowerCase();
+  let pool = captions.default;
+  if (lower.includes('comedy') || lower.includes('skit') || lower.includes('funny') || lower.includes('joke')) pool = captions.comedy;
+  else if (lower.includes('food') || lower.includes('cook') || lower.includes('recipe') || lower.includes('jollof')) pool = captions.food;
+  else if (lower.includes('fashion') || lower.includes('outfit') || lower.includes('style') || lower.includes('wear')) pool = captions.fashion;
+
+  setTimeout(() => {
+    const result = pool[Math.floor(Math.random() * pool.length)];
+    document.getElementById('caption-text').textContent = result.caption;
+    document.getElementById('hashtag-text').textContent = result.hashtags;
+    document.getElementById('ai-result').classList.add('show');
+    btn.disabled = false;
+    btn.textContent = 'Generate →';
+    document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 1500);
+}
+
+function copyCaption() {
+  const caption = document.getElementById('caption-text').textContent;
+  const hashtags = document.getElementById('hashtag-text').textContent;
+  navigator.clipboard.writeText(caption + '\n\n' + hashtags).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = 'Copy caption + hashtags';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+
+document.getElementById('video-desc').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generateCaption();
+});
+</script>
+</body>
+</html>
