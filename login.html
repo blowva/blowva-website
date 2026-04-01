@@ -257,8 +257,8 @@ footer{
 
 <script>
 const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0ZmdjandpdmxhcG1zaGdhcW51YiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQzNTA1NzM2LCJleHAiOjIwNTkwODE3MzZ9.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function showError(msg) {
   const el = document.getElementById('error-msg');
@@ -310,7 +310,7 @@ async function login() {
   btn.disabled = true;
   btn.textContent = 'Logging you in...';
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await sbClient.auth.signInWithPassword({ email, password });
 
   btn.disabled = false;
   btn.textContent = 'Log in to Blowva →';
@@ -337,7 +337,7 @@ async function resetPassword() {
     return showError('Please enter a valid email address.');
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  const { error } = await sbClient.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + '/reset-password.html'
   });
 
@@ -358,7 +358,7 @@ document.addEventListener('keydown', e => {
 });
 
 // Check if already logged in
-supabase.auth.getSession().then(({ data }) => {
+sbClient.auth.getSession().then(({ data }) => {
   if (data.session) {
     window.location.href = 'dashboard.html';
   }
