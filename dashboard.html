@@ -497,7 +497,7 @@ const captions = {
   ]
 };
 
-function generateCaption() {
+async function generateCaption() {
   const desc = document.getElementById('video-desc').value.trim();
   if (!desc) {
     document.getElementById('video-desc').style.borderColor = '#EF4444';
@@ -507,24 +507,63 @@ function generateCaption() {
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true;
-  btn.textContent = 'Generating...';
+  btn.textContent = '⚡ AI is writing...';
+  document.getElementById('ai-result').classList.remove('show');
 
-  // Detect niche from description
-  const lower = desc.toLowerCase();
-  let pool = captions.default;
-  if (lower.includes('comedy') || lower.includes('skit') || lower.includes('funny') || lower.includes('joke')) pool = captions.comedy;
-  else if (lower.includes('food') || lower.includes('cook') || lower.includes('recipe') || lower.includes('jollof')) pool = captions.food;
-  else if (lower.includes('fashion') || lower.includes('outfit') || lower.includes('style') || lower.includes('wear')) pool = captions.fashion;
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': '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',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `You are a viral social media expert specializing in Nigerian and African content creators. Generate a highly engaging caption and hashtags for a TikTok/Instagram/Facebook video.
 
-  setTimeout(() => {
-    const result = pool[Math.floor(Math.random() * pool.length)];
+Video description: "${desc}"
+
+Rules:
+- Write the caption specifically for Nigerian/African audiences
+- Use relatable Nigerian language naturally (not forced)
+- Make it scroll-stopping and engaging
+- 2-4 lines maximum
+- Include relevant emojis
+- Hashtags should include Nigerian-specific ones like #NaijaCreator #NigerianTikTok etc
+
+Return ONLY a JSON object, no other text, no markdown:
+{"caption": "your caption here", "hashtags": "#tag1 #tag2 #tag3 (10-15 hashtags)"}`
+        }]
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error.message);
+    }
+
+    const text = data.content[0].text;
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
     document.getElementById('caption-text').textContent = result.caption;
     document.getElementById('hashtag-text').textContent = result.hashtags;
     document.getElementById('ai-result').classList.add('show');
-    btn.disabled = false;
-    btn.textContent = 'Generate →';
     document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 1500);
+
+  } catch (err) {
+    console.error(err);
+    alert('Could not generate caption right now. Please check your connection and try again.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate →';
 }
 
 function copyCaption() {
