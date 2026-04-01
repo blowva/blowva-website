@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blowva — Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --green: #00B859;
+  --green-light: #E8F9EF;
+  --green-border: rgba(0,184,89,0.22);
+  --black: #080F09;
+  --white: #FFFFFF;
+  --off: #F6FAF7;
+  --muted: #5A7360;
+  --muted2: #93AE99;
+  --border: #DFF0E5;
+  --red: #EF4444;
+  --red-light: #FEF2F2;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--off);
+  display:flex;flex-direction:column;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* NAV */
+nav{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:0.9rem 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
+.logo-icon{
+  width:32px;height:32px;background:var(--green);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+}
+.logo-arrow{
+  width:0;height:0;
+  border-top:5px solid transparent;
+  border-bottom:5px solid transparent;
+  border-left:10px solid #fff;
+  margin-left:2px;
+}
+.logo-text{font-size:1.2rem;font-weight:800;color:var(--black);letter-spacing:-.5px;}
+.logo-text span{color:var(--green);}
+.nav-link{font-size:0.85rem;color:var(--muted);text-decoration:none;font-weight:500;}
+.nav-link:hover{color:var(--black);}
+
+/* MAIN */
+main{
+  flex:1;display:flex;align-items:center;
+  justify-content:center;padding:2rem 1rem;
+}
+
+.card{
+  background:var(--white);
+  border:1.5px solid var(--border);
+  border-radius:20px;
+  padding:2.5rem 2rem;
+  width:100%;max-width:420px;
+  box-shadow:0 4px 24px rgba(0,100,40,0.07);
+}
+
+.card-header{text-align:center;margin-bottom:2rem;}
+.card-icon{
+  width:52px;height:52px;background:var(--green);
+  border-radius:14px;margin:0 auto 1rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.card-icon .arr{
+  width:0;height:0;
+  border-top:8px solid transparent;
+  border-bottom:8px solid transparent;
+  border-left:14px solid #fff;
+  margin-left:3px;
+}
+.card-title{font-size:1.4rem;font-weight:800;color:var(--black);margin-bottom:4px;}
+.card-sub{font-size:0.85rem;color:var(--muted);}
+
+/* FORM */
+.form-group{margin-bottom:1rem;}
+label{
+  display:block;font-size:0.82rem;font-weight:600;
+  color:var(--black);margin-bottom:6px;
+}
+input{
+  width:100%;padding:0.8rem 1rem;
+  border:1.5px solid var(--border);
+  border-radius:10px;font-size:0.9rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--black);background:var(--white);
+  transition:border-color 0.2s,box-shadow 0.2s;
+  outline:none;
+}
+input:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(0,184,89,0.1);
+}
+input.error{border-color:var(--red);}
+input::placeholder{color:var(--muted2);}
+
+.input-hint{font-size:0.75rem;color:var(--muted2);margin-top:4px;}
+
+.btn-submit{
+  width:100%;padding:0.9rem;
+  background:var(--green);color:#fff;border:none;
+  border-radius:10px;font-size:0.95rem;font-weight:700;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  cursor:pointer;transition:opacity 0.2s,transform 0.15s;
+  box-shadow:0 4px 16px rgba(0,184,89,0.25);
+  margin-top:0.5rem;
+}
+.btn-submit:hover{opacity:0.9;transform:translateY(-1px);}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+
+/* MESSAGES */
+.msg{
+  padding:0.8rem 1rem;border-radius:10px;
+  font-size:0.85rem;font-weight:500;
+  margin-bottom:1rem;display:none;
+}
+.msg.error{background:var(--red-light);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+.msg.success{background:var(--green-light);color:var(--green);border:1px solid var(--green-border);}
+.msg.show{display:block;}
+
+/* DIVIDER */
+.divider{
+  display:flex;align-items:center;gap:10px;
+  margin:1.25rem 0;
+}
+.divider-line{flex:1;height:1px;background:var(--border);}
+.divider-text{font-size:0.75rem;color:var(--muted2);font-weight:500;}
+
+/* NICHE SELECT */
+select{
+  width:100%;padding:0.8rem 1rem;
+  border:1.5px solid var(--border);
+  border-radius:10px;font-size:0.9rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--black);background:var(--white);
+  transition:border-color 0.2s;outline:none;
+  cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2393AE99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 1rem center;
+}
+select:focus{border-color:var(--green);}
+
+/* BOTTOM LINK */
+.bottom-link{
+  text-align:center;margin-top:1.5rem;
+  font-size:0.85rem;color:var(--muted);
+}
+.bottom-link a{color:var(--green);font-weight:600;text-decoration:none;}
+.bottom-link a:hover{text-decoration:underline;}
+
+/* TERMS */
+.terms{
+  font-size:0.75rem;color:var(--muted2);
+  text-align:center;margin-top:1rem;line-height:1.6;
+}
+.terms a{color:var(--green);text-decoration:none;}
+
+/* SUCCESS STATE */
+.success-state{display:none;text-align:center;padding:1rem 0;}
+.success-state.show{display:block;}
+.success-icon{
+  width:64px;height:64px;background:var(--green-light);
+  border-radius:50%;margin:0 auto 1rem;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.75rem;
+}
+.success-title{font-size:1.2rem;font-weight:800;color:var(--black);margin-bottom:0.5rem;}
+.success-sub{font-size:0.88rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem;}
+.btn-dashboard{
+  display:inline-block;
+  background:var(--green);color:#fff;
+  padding:0.8rem 2rem;border-radius:10px;
+  font-size:0.9rem;font-weight:700;
+  text-decoration:none;
+  box-shadow:0 4px 16px rgba(0,184,89,0.25);
+  transition:opacity 0.2s;
+}
+.btn-dashboard:hover{opacity:0.9;}
+
+/* FOOTER */
+footer{
+  text-align:center;padding:1.25rem;
+  font-size:0.75rem;color:var(--muted2);
+  border-top:1px solid var(--border);
+  background:var(--white);
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">
+    <div class="logo-icon"><div class="logo-arrow"></div></div>
+    <div class="logo-text">Blow<span>va</span></div>
+  </a>
+  <a class="nav-link" href="login.html">Already have an account? Log in →</a>
+</nav>
+
+<main>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><div class="arr"></div></div>
+      <div class="card-title">Create your account</div>
+      <div class="card-sub">Start blowing up on every platform — free</div>
+    </div>
+
+    <!-- ERROR / SUCCESS MESSAGES -->
+    <div class="msg error" id="error-msg"></div>
+    <div class="msg success" id="success-msg-top"></div>
+
+    <!-- FORM -->
+    <div id="form-area">
+      <div class="form-group">
+        <label for="fullname">Full name</label>
+        <input type="text" id="fullname" placeholder="e.g. Precious Sunday" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="niche">Your content niche</label>
+        <select id="niche">
+          <option value="">Select your niche...</option>
+          <option value="comedy">Comedy & Entertainment</option>
+          <option value="fashion">Fashion & Style</option>
+          <option value="food">Food & Cooking</option>
+          <option value="music">Music & Dance</option>
+          <option value="education">Education & Tutorials</option>
+          <option value="fitness">Fitness & Health</option>
+          <option value="lifestyle">Lifestyle & Vlogging</option>
+          <option value="business">Business & Finance</option>
+          <option value="gaming">Gaming</option>
+          <option value="beauty">Beauty & Makeup</option>
+          <option value="travel">Travel</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="input-hint">Must be at least 8 characters long</div>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm-password">Confirm password</label>
+        <input type="password" id="confirm-password" placeholder="Repeat your password" autocomplete="new-password">
+      </div>
+
+      <button class="btn-submit" id="submit-btn" onclick="register()">
+        Create free account →
+      </button>
+
+      <div class="terms">
+        By creating an account you agree to our
+        <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="success-state">
+      <div class="success-icon">✓</div>
+      <div class="success-title">You're in! Welcome to Blowva 🎉</div>
+      <div class="success-sub">We sent a confirmation email to your inbox. Click the link to verify your account then log in to your dashboard.</div>
+      <a class="btn-dashboard" href="login.html">Go to login →</a>
+    </div>
+
+    <div class="bottom-link" id="bottom-link">
+      Already have an account? <a href="login.html">Log in here</a>
+    </div>
+  </div>
+</main>
+
+<footer>© 2025 Blowva — Blow Up with Viral Amplification</footer>
+
+<script>
+// ── SUPABASE SETUP ──
+const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0ZmdjandpdmxhcG1zaGdhcW51YiIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQzNTA1NzM2LCJleHAiOjIwNTkwODE3MzZ9.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+  el.classList.remove('success');
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+
+function clearErrors() {
+  document.getElementById('error-msg').classList.remove('show');
+  document.querySelectorAll('input').forEach(i => i.classList.remove('error'));
+}
+
+async function register() {
+  clearErrors();
+  const name     = document.getElementById('fullname').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const niche    = document.getElementById('niche').value;
+  const password = document.getElementById('password').value;
+  const confirm  = document.getElementById('confirm-password').value;
+  const btn      = document.getElementById('submit-btn');
+
+  // Validation
+  if (!name) {
+    document.getElementById('fullname').classList.add('error');
+    return showError('Please enter your full name.');
+  }
+  if (!email || !email.includes('@')) {
+    document.getElementById('email').classList.add('error');
+    return showError('Please enter a valid email address.');
+  }
+  if (!niche) return showError('Please select your content niche.');
+  if (password.length < 8) {
+    document.getElementById('password').classList.add('error');
+    return showError('Password must be at least 8 characters.');
+  }
+  if (password !== confirm) {
+    document.getElementById('confirm-password').classList.add('error');
+    return showError('Passwords do not match. Please check and try again.');
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating your account...';
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: name, niche: niche }
+    }
+  });
+
+  btn.disabled = false;
+  btn.textContent = 'Create free account →';
+
+  if (error) {
+    if (error.message.includes('already registered')) {
+      return showError('This email is already registered. Try logging in instead.');
+    }
+    return showError('Something went wrong: ' + error.message);
+  }
+
+  // SUCCESS
+  document.getElementById('form-area').style.display = 'none';
+  document.getElementById('bottom-link').style.display = 'none';
+  document.getElementById('success-state').classList.add('show');
+}
+
+// Allow Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') register();
+});
+</script>
+</body>
+</html>
