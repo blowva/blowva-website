@@ -1,6 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+window.openDrawer = function() {
+  var d = document.getElementById('drawer');
+  var o = document.getElementById('drawer-overlay');
+  if(d) d.classList.add('open');
+  if(o) o.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+window.closeDrawer = function() {
+  var d = document.getElementById('drawer');
+  var o = document.getElementById('drawer-overlay');
+  if(d) d.classList.remove('open');
+  if(o) o.classList.remove('open');
+  document.body.style.overflow = '';
+};
+window.setTheme = function(mode) {
+  if(mode==='dark'){
+    document.body.classList.add('dark');
+    var bd=document.getElementById('btn-dark');
+    var bl=document.getElementById('btn-light');
+    if(bd)bd.classList.add('active');
+    if(bl)bl.classList.remove('active');
+    localStorage.setItem('blowva-theme','dark');
+  } else {
+    document.body.classList.remove('dark');
+    var bd=document.getElementById('btn-dark');
+    var bl=document.getElementById('btn-light');
+    if(bd)bd.classList.remove('active');
+    if(bl)bl.classList.add('active');
+    localStorage.setItem('blowva-theme','light');
+  }
+};
+document.addEventListener('DOMContentLoaded',function(){
+  if(localStorage.getItem('blowva-theme')==='dark') window.setTheme('dark');
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')window.closeDrawer();});
+});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blowva — Dashboard</title>
@@ -374,7 +411,7 @@ nav{
     <a class="drawer-item" href="index.html"><span class="drawer-icon">🏠</span><span class="drawer-item-text">Back to home</span></a>
     <a class="drawer-item" href="privacy.html"><span class="drawer-icon">🔒</span><span class="drawer-item-text">Privacy Policy</span></a>
     <a class="drawer-item" href="terms.html"><span class="drawer-icon">📄</span><span class="drawer-item-text">Terms of Service</span></a>
-    <a class="drawer-item" href="mailto:hello@blowva.com"><span class="drawer-icon">✉️</span><span class="drawer-item-text">Contact support</span></a>
+    <a class="drawer-item" href="/cdn-cgi/l/email-protection#cba3aea7a7a48ba9a7a4bcbdaae5a8a4a6"><span class="drawer-icon">✉️</span><span class="drawer-item-text">Contact support</span></a>
     <div class="drawer-item" onclick="logout()"><span class="drawer-icon">🚪</span><span class="drawer-item-text" style="color:#EF4444">Log out</span></div>
   </div>
 
@@ -391,14 +428,16 @@ nav{
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="index.html">
-    <div class="logo-icon"><div class="logo-arrow"></div></div>
-    <div class="logo-text">Blow<span>va</span></div>
-  </a>
-  <div class="nav-right">
+  <div style="display:flex;align-items:center;gap:6px;">
     <button class="hamburger-dash" onclick="openDrawer()">
       <span></span><span></span><span></span>
     </button>
+    <a class="logo" href="index.html">
+      <div class="logo-icon"><div class="logo-arrow"></div></div>
+      <div class="logo-text">Blow<span>va</span></div>
+    </a>
+  </div>
+  <div class="nav-right">
     <div class="user-pill">
       <div class="user-av" id="user-av">?</div>
       <div class="user-name" id="user-name">Loading...</div>
@@ -548,7 +587,7 @@ nav{
   </main>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -694,9 +733,4 @@ function setTheme(mode) {
   }
 }
 (function(){
-  if(localStorage.getItem('blowva-theme')==='dark') setTheme('dark');
-})();
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
-</script>
-</body>
-</html>
+  if(localStorage.getItem('blowva-theme
