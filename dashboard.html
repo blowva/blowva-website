@@ -590,23 +590,44 @@ nav{
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
-const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage }
+});
 
-// Check auth on load
-sbClient.auth.getSession().then(({ data }) => {
-  if (!data.session) {
-    window.location.href = 'login.html';
+function loadUser(user) {
+  const name = user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email.split('@')[0];
+  const parts = name.split(' ');
+  const initials = parts.map(function(n){ return n[0]; }).join('').toUpperCase().slice(0,2);
+  document.getElementById('user-av').textContent = initials;
+  document.getElementById('user-name').textContent = parts[0];
+  document.getElementById('welcome-name').textContent = parts[0];
+  document.getElementById('loading').style.display = 'none';
+}
+
+sbClient.auth.onAuthStateChange(function(event, session) {
+  if (session && session.user) {
+    loadUser(session.user);
+  } else if (!session) {
+    window.location.replace('login.html');
+  }
+});
+
+sbClient.auth.getSession().then(function(res) {
+  if (res.error || !res.data.session) {
+    window.location.replace('login.html');
     return;
   }
-  const user = data.session.user;
-  const name = user.user_metadata?.full_name || user.email.split('@')[0];
-  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-
-  document.getElementById('user-av').textContent = initials;
-  document.getElementById('user-name').textContent = name.split(' ')[0];
-  document.getElementById('welcome-name').textContent = name.split(' ')[0];
-  document.getElementById('loading').style.display = 'none';
+  loadUser(res.data.session.user);
+}).catch(function() {
+  window.location.replace('login.html');
 });
+
+setTimeout(function() {
+  var loading = document.getElementById('loading');
+  if (loading && loading.style.display !== 'none') {
+    window.location.replace('login.html');
+  }
+}, 8000);
 
 async function logout() {
   await sbClient.auth.signOut();
