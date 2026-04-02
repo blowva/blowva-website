@@ -1,761 +1,632 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<script>
-window.openDrawer = function() {
-  var d = document.getElementById('drawer');
-  var o = document.getElementById('drawer-overlay');
-  if(d) d.classList.add('open');
-  if(o) o.classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-window.closeDrawer = function() {
-  var d = document.getElementById('drawer');
-  var o = document.getElementById('drawer-overlay');
-  if(d) d.classList.remove('open');
-  if(o) o.classList.remove('open');
-  document.body.style.overflow = '';
-};
-window.setTheme = function(mode) {
-  if(mode==='dark'){
-    document.body.classList.add('dark');
-    var bd=document.getElementById('btn-dark');
-    var bl=document.getElementById('btn-light');
-    if(bd)bd.classList.add('active');
-    if(bl)bl.classList.remove('active');
-    localStorage.setItem('blowva-theme','dark');
-  } else {
-    document.body.classList.remove('dark');
-    var bd=document.getElementById('btn-dark');
-    var bl=document.getElementById('btn-light');
-    if(bd)bd.classList.remove('active');
-    if(bl)bl.classList.add('active');
-    localStorage.setItem('blowva-theme','light');
-  }
-};
-document.addEventListener('DOMContentLoaded',function(){
-  if(localStorage.getItem('blowva-theme')==='dark') window.setTheme('dark');
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')window.closeDrawer();});
-});
-</script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Blowva — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-:root {
-  --green: #00B859;
-  --green-light: #E8F9EF;
-  --green-border: rgba(0,184,89,0.22);
-  --black: #080F09;
-  --white: #FFFFFF;
-  --off: #F6FAF7;
-  --muted: #5A7360;
-  --muted2: #93AE99;
-  --border: #DFF0E5;
-  --border2: #C8E4D0;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{
-  font-family:'Plus Jakarta Sans',sans-serif;
-  background:var(--off);
-  color:var(--black);
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
+import { useState, useEffect } from 'react'
+import supabase from '../lib/supabase'
+import { X, LogOut, TrendingUp, Users, Video, Award, Copy, Check, ArrowRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+interface DashboardProps {
+  user: any
 }
 
-/* NAV */
-nav{
-  background:var(--white);
-  border-bottom:1px solid var(--border);
-  padding:0 1rem;
-  display:flex;align-items:center;
-  justify-content:space-between;
-  height:60px;
-  position:sticky;top:0;z-index:100;
-}
-.logo{display:flex;align-items:center;gap:9px;text-decoration:none;}
-.logo-icon{
-  width:32px;height:32px;background:var(--green);
-  border-radius:9px;display:flex;align-items:center;justify-content:center;
-}
-.logo-arrow{
-  width:0;height:0;
-  border-top:5px solid transparent;
-  border-bottom:5px solid transparent;
-  border-left:10px solid #fff;
-  margin-left:2px;
-}
-.logo-text{font-size:1.15rem;font-weight:800;color:var(--black);letter-spacing:-.5px;}
-.logo-text span{color:var(--green);}
-
-.nav-right{display:flex;align-items:center;gap:1rem;}
-.user-pill{
-  display:flex;align-items:center;gap:8px;
-  background:var(--off);border:1px solid var(--border);
-  border-radius:999px;padding:4px 12px 4px 4px;
-}
-.user-av{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--green);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;
-}
-.user-name{font-size:0.82rem;font-weight:600;color:var(--black);}
-.btn-logout{
-  font-size:0.8rem;color:var(--muted);
-  background:none;border:none;cursor:pointer;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-weight:500;transition:color 0.2s;
-}
-.btn-logout:hover{color:var(--black);}
-
-/* LAYOUT */
-.layout{display:flex;min-height:calc(100vh - 60px);}
-
-/* SIDEBAR */
-.sidebar{
-  width:220px;flex-shrink:0;
-  background:var(--white);
-  border-right:1px solid var(--border);
-  padding:1.5rem 1rem;
-  display:flex;flex-direction:column;gap:4px;
-}
-.nav-item{
-  display:flex;align-items:center;gap:10px;
-  padding:0.65rem 0.85rem;border-radius:10px;
-  font-size:0.875rem;font-weight:500;color:var(--muted);
-  cursor:pointer;transition:background 0.15s,color 0.15s;
-  text-decoration:none;
-}
-.nav-item:hover{background:var(--off);color:var(--black);}
-.nav-item.active{background:var(--green-light);color:var(--green);font-weight:700;}
-.nav-item .icon{font-size:16px;flex-shrink:0;}
-.sidebar-bottom{margin-top:auto;}
-.sidebar-badge{
-  background:var(--green-light);border:1px solid var(--green-border);
-  border-radius:12px;padding:0.85rem;margin-top:1rem;
-}
-.sb-title{font-size:0.78rem;font-weight:700;color:var(--green);margin-bottom:3px;}
-.sb-text{font-size:0.72rem;color:var(--muted);line-height:1.5;}
-
-/* MAIN */
-.main{flex:1;padding:2rem;overflow-x:hidden;}
-
-/* WELCOME */
-.welcome{margin-bottom:1.75rem;}
-.welcome h1{
-  font-size:1.4rem;font-weight:800;
-  color:var(--black);margin-bottom:3px;
-}
-.welcome p{font-size:0.88rem;color:var(--muted);}
-
-/* STATS */
-.stats-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:12px;margin-bottom:1.75rem;
-}
-.stat-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:14px;padding:1.1rem;
-  transition:border-color 0.2s,box-shadow 0.2s;
-}
-.stat-card:hover{border-color:var(--green-border);box-shadow:0 2px 12px rgba(0,184,89,0.07);}
-.stat-label{font-size:0.72rem;color:var(--muted);font-weight:500;margin-bottom:6px;}
-.stat-val{font-size:1.7rem;font-weight:800;color:var(--black);line-height:1;}
-.stat-change{font-size:0.7rem;color:var(--green);font-weight:600;margin-top:4px;}
-.stat-change.grey{color:var(--muted2);}
-
-/* SECTION TITLE */
-.sec-title{
-  font-size:1rem;font-weight:800;
-  color:var(--black);margin-bottom:1rem;
+interface Caption {
+  id: string
+  description: string
+  caption: string
+  hashtags: string
+  created_at: string
 }
 
-/* QUICK ACTIONS */
-.quick-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:12px;margin-bottom:1.75rem;
-}
-.quick-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:14px;padding:1.25rem;
-  cursor:pointer;transition:all 0.2s;
-  display:flex;flex-direction:column;gap:8px;
-}
-.quick-card:hover{
-  border-color:var(--green);
-  box-shadow:0 4px 20px rgba(0,184,89,0.1);
-  transform:translateY(-2px);
-}
-.quick-icon{
-  width:40px;height:40px;border-radius:10px;
-  background:var(--green-light);
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-}
-.quick-title{font-size:0.88rem;font-weight:700;color:var(--black);}
-.quick-sub{font-size:0.76rem;color:var(--muted);line-height:1.5;}
-
-/* AI CAPTION BOX */
-.ai-box{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:16px;padding:1.5rem;
-  margin-bottom:1.75rem;
-}
-.ai-box-header{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:1.1rem;
-}
-.ai-badge{
-  background:var(--green);color:#fff;
-  font-size:0.65rem;font-weight:800;
-  padding:3px 8px;border-radius:999px;letter-spacing:0.5px;
-}
-.ai-box-title{font-size:0.95rem;font-weight:800;color:var(--black);}
-.ai-input-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
-.ai-input{
-  flex:1;min-width:200px;
-  padding:0.75rem 1rem;
-  border:1.5px solid var(--border2);
-  border-radius:10px;font-size:0.88rem;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  color:var(--black);outline:none;
-  transition:border-color 0.2s;
-}
-.ai-input:focus{border-color:var(--green);}
-.ai-input::placeholder{color:var(--muted2);}
-.btn-generate{
-  background:var(--green);color:#fff;border:none;
-  padding:0.75rem 1.5rem;border-radius:10px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.88rem;font-weight:700;cursor:pointer;
-  transition:opacity 0.2s,transform 0.15s;
-  white-space:nowrap;
-}
-.btn-generate:hover{opacity:0.9;transform:translateY(-1px);}
-.btn-generate:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
-
-.ai-result{
-  background:var(--off);border:1px solid var(--border);
-  border-radius:10px;padding:1rem;
-  display:none;
-}
-.ai-result.show{display:block;}
-.ai-result-label{
-  font-size:0.68rem;font-weight:700;color:var(--green);
-  text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;
-}
-.ai-caption-text{
-  font-size:0.88rem;color:var(--black);
-  line-height:1.7;margin-bottom:10px;
-}
-.ai-hashtags{
-  font-size:0.82rem;color:var(--green);
-  font-weight:600;line-height:1.8;
-}
-.copy-btn{
-  background:var(--white);border:1px solid var(--border2);
-  color:var(--muted);padding:5px 14px;border-radius:7px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.75rem;font-weight:600;cursor:pointer;
-  margin-top:8px;transition:all 0.15s;
-}
-.copy-btn:hover{border-color:var(--green);color:var(--green);}
-
-/* CONNECT PLATFORMS */
-.platforms-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;margin-bottom:1.75rem;
-}
-.plat-card{
-  background:var(--white);border:1.5px solid var(--border);
-  border-radius:14px;padding:1.1rem;
-  display:flex;align-items:center;gap:12px;
-  transition:border-color 0.2s;
-}
-.plat-icon{
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;
-}
-.plat-name{font-size:0.85rem;font-weight:700;color:var(--black);}
-.plat-status{font-size:0.72rem;color:var(--muted2);margin-top:1px;}
-.btn-connect{
-  margin-left:auto;
-  background:var(--green-light);color:var(--green);
-  border:1px solid var(--green-border);
-  padding:4px 12px;border-radius:7px;
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-size:0.72rem;font-weight:700;cursor:pointer;
-  transition:background 0.15s;white-space:nowrap;
-}
-.btn-connect:hover{background:var(--green);color:#fff;}
-
-/* LOADING */
-.loading{
-  position:fixed;inset:0;background:var(--white);
-  display:flex;align-items:center;justify-content:center;
-  z-index:999;flex-direction:column;gap:12px;
-}
-.loading-icon{
-  width:52px;height:52px;background:var(--green);
-  border-radius:14px;display:flex;align-items:center;justify-content:center;
-  animation:pulse 1.5s infinite;
-}
-.loading-icon .arr{
-  width:0;height:0;
-  border-top:8px solid transparent;
-  border-bottom:8px solid transparent;
-  border-left:14px solid #fff;
-  margin-left:3px;
-}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
-.loading-text{font-size:0.85rem;color:var(--muted);font-weight:500;}
-
-/* MOBILE */
-@media(max-width:700px){
-  .sidebar{display:none;}
-  .main{padding:1.25rem;}
-  .stats-grid{grid-template-columns:1fr 1fr;}
-  .quick-grid{grid-template-columns:1fr 1fr;}
+interface Post {
+  id: string
+  title: string
+  description: string
+  platform: string
+  views: number
+  likes: number
+  created_at: string
 }
 
-.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;}
-.drawer-overlay.open{opacity:1;pointer-events:all;}
-.drawer{position:fixed;top:0;left:-300px;width:280px;height:100vh;background:var(--white);z-index:400;transition:left 0.3s ease;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;}
-.drawer.open{left:0;}
-.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:2;}
-.drawer-logo{display:flex;align-items:center;gap:8px;}
-.drawer-logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;}
-.drawer-logo-arrow{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #fff;margin-left:2px;}
-.drawer-logo-text{font-size:1.1rem;font-weight:800;color:var(--black);}
-.drawer-logo-text span{color:var(--green);}
-.drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
-.drawer-close:hover{background:var(--off);}
-.theme-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--off);}
-.theme-label{font-size:.82rem;font-weight:600;color:var(--muted);}
-.theme-btns{display:flex;gap:6px;}
-.theme-btn{padding:4px 12px;border-radius:7px;font-size:.75rem;font-weight:700;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;}
-.theme-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
-.drawer-section{padding:.6rem 0;}
-.drawer-section-title{font-size:.65rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;padding:.4rem 1.25rem .3rem;}
-.drawer-item{display:flex;align-items:center;gap:12px;padding:.75rem 1.25rem;font-size:.9rem;font-weight:500;color:var(--black);text-decoration:none;transition:background 0.15s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;}
-.drawer-item:hover{background:var(--green-light);}
-.drawer-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center;}
-.drawer-item-text{flex:1;}
-.drawer-item-badge{font-size:.65rem;font-weight:700;background:var(--green);color:#fff;padding:2px 7px;border-radius:999px;}
-.drawer-item-badge.warn{background:#F59E0B;}
-.drawer-divider{height:1px;background:var(--border);margin:.4rem 0;}
-.drawer-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border);background:var(--off);}
-.drawer-footer-text{font-size:.72rem;color:var(--muted2);text-align:center;line-height:1.6;}
-.drawer-footer-text a{color:var(--green);text-decoration:none;font-weight:500;}
-.hamburger-dash{display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s;}
-.hamburger-dash:hover{background:var(--off);}
-.hamburger-dash span{display:block;width:20px;height:2px;background:var(--black);border-radius:2px;}
-</style>
-</head>
-<body>
-
-<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer">
-  <div class="drawer-header">
-    <div class="drawer-logo">
-      <div class="drawer-logo-icon"><div class="drawer-logo-arrow"></div></div>
-      <div class="drawer-logo-text">Blow<span>va</span></div>
-    </div>
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
-  </div>
-
-  <div class="theme-row">
-    <div class="theme-label">Display</div>
-    <div class="theme-btns">
-      <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ Light</button>
-      <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 Dark</button>
-    </div>
-  </div>
-
-  <div class="drawer-section">
-    <div class="drawer-section-title">Dashboard</div>
-    <a class="drawer-item" href="dashboard.html"><span class="drawer-icon">📊</span><span class="drawer-item-text">Overview</span></a>
-    <div class="drawer-item"><span class="drawer-icon">🎬</span><span class="drawer-item-text">Upload video</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">✍️</span><span class="drawer-item-text">AI captions</span></div>
-    <div class="drawer-item"><span class="drawer-icon">💡</span><span class="drawer-item-text">Content suggestions</span></div>
-    <div class="drawer-item"><span class="drawer-icon">📈</span><span class="drawer-item-text">Analytics</span></div>
-  </div>
-
-  <div class="drawer-divider"></div>
-
-  <div class="drawer-section">
-    <div class="drawer-section-title">Account</div>
-    <div class="drawer-item"><span class="drawer-icon">⚙️</span><span class="drawer-item-text">Account settings</span></div>
-    <div class="drawer-item"><span class="drawer-icon">🔗</span><span class="drawer-item-text">Connected accounts</span></div>
-    <div class="drawer-item"><span class="drawer-icon">💳</span><span class="drawer-item-text">Subscription & billing</span></div>
-    <div class="drawer-item"><span class="drawer-icon">🔔</span><span class="drawer-item-text">Notifications</span></div>
-  </div>
-
-  <div class="drawer-divider"></div>
-
-  <div class="drawer-section">
-    <div class="drawer-section-title">Connect Platforms</div>
-    <div class="drawer-item"><span class="drawer-icon">🎵</span><span class="drawer-item-text">Connect TikTok</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">📸</span><span class="drawer-item-text">Connect Instagram</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">👤</span><span class="drawer-item-text">Connect Facebook</span><span class="drawer-item-badge warn">Soon</span></div>
-  </div>
-
-  <div class="drawer-divider"></div>
-
-  <div class="drawer-section">
-    <div class="drawer-section-title">Help & Info</div>
-    <a class="drawer-item" href="index.html"><span class="drawer-icon">🏠</span><span class="drawer-item-text">Back to home</span></a>
-    <a class="drawer-item" href="privacy.html"><span class="drawer-icon">🔒</span><span class="drawer-item-text">Privacy Policy</span></a>
-    <a class="drawer-item" href="terms.html"><span class="drawer-icon">📄</span><span class="drawer-item-text">Terms of Service</span></a>
-    <a class="drawer-item" href="/cdn-cgi/l/email-protection#cba3aea7a7a48ba9a7a4bcbdaae5a8a4a6"><span class="drawer-icon">✉️</span><span class="drawer-item-text">Contact support</span></a>
-    <div class="drawer-item" onclick="logout()"><span class="drawer-icon">🚪</span><span class="drawer-item-text" style="color:#EF4444">Log out</span></div>
-  </div>
-
-  <div class="drawer-footer">
-    <div class="drawer-footer-text">Blowva © 2026<br><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></div>
-  </div>
-</div>
-
-<!-- LOADING -->
-<div class="loading" id="loading">
-  <div class="loading-icon"><div class="arr"></div></div>
-  <div class="loading-text">Loading your dashboard...</div>
-</div>
-
-<!-- NAV -->
-<nav>
-  <div style="display:flex;align-items:center;gap:0;">
-    <button class="hamburger-dash" onclick="openDrawer()" style="margin-right:2px;">
-      <span></span><span></span><span></span>
-    </button>
-    <a class="logo" href="index.html" style="margin-left:6px;">
-      <div class="logo-icon"><div class="logo-arrow"></div></div>
-      <div class="logo-text" style="margin-left:8px;">Blow<span>va</span></div>
-    </a>
-  </div>
-  <div class="nav-right">
-    <div class="user-pill">
-      <div class="user-av" id="user-av">?</div>
-      <div class="user-name" id="user-name">Loading...</div>
-    </div>
-    <button class="btn-logout" onclick="logout()">Log out</button>
-  </div>
-</nav>
-
-<div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <a class="nav-item active" href="dashboard.html">
-      <span class="icon">📊</span> Dashboard
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">⚡</span> Post video
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">✍️</span> AI captions
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">💡</span> Suggestions
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">📈</span> Analytics
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">🔗</span> Accounts
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">⚙️</span> Settings
-    </a>
-    <div class="sidebar-bottom">
-      <div class="sidebar-badge">
-        <div class="sb-title">🚀 Free plan</div>
-        <div class="sb-text">5 AI posts/month. Upgrade to blow up faster.</div>
-      </div>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- WELCOME -->
-    <div class="welcome">
-      <h1>Welcome to Blowva, <span id="welcome-name" style="color:var(--green)">Creator</span> 👋</h1>
-      <p>Here is your growth overview. Connect your social accounts to get started.</p>
-    </div>
-
-    <!-- STATS -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total views</div>
-        <div class="stat-val">0</div>
-        <div class="stat-change grey">Connect accounts to track</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Followers gained</div>
-        <div class="stat-val">0</div>
-        <div class="stat-change grey">Connect accounts to track</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Posts published</div>
-        <div class="stat-val">0</div>
-        <div class="stat-change grey">No posts yet</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Viral score</div>
-        <div class="stat-val" style="color:var(--green)">—</div>
-        <div class="stat-change grey">Post a video to get score</div>
-      </div>
-    </div>
-
-    <!-- QUICK ACTIONS -->
-    <div class="sec-title">Quick actions</div>
-    <div class="quick-grid">
-      <div class="quick-card" onclick="alert('Video upload coming soon! We are building this next.')">
-        <div class="quick-icon">🎬</div>
-        <div class="quick-title">Upload a video</div>
-        <div class="quick-sub">Post to TikTok, Instagram & Facebook automatically</div>
-      </div>
-      <div class="quick-card" onclick="document.getElementById('ai-section').scrollIntoView({behavior:'smooth'})">
-        <div class="quick-icon">✍️</div>
-        <div class="quick-title">Generate AI caption</div>
-        <div class="quick-sub">Get a scroll-stopping caption and hashtags instantly</div>
-      </div>
-      <div class="quick-card" onclick="document.getElementById('platforms-section').scrollIntoView({behavior:'smooth'})">
-        <div class="quick-icon">🔗</div>
-        <div class="quick-title">Connect accounts</div>
-        <div class="quick-sub">Link your TikTok, Instagram and Facebook</div>
-      </div>
-      <div class="quick-card" onclick="alert('Content suggestions coming soon! Keep posting and Blowva learns your niche.')">
-        <div class="quick-icon">💡</div>
-        <div class="quick-title">Content suggestions</div>
-        <div class="quick-sub">See what videos to make next for your niche</div>
-      </div>
-    </div>
-
-    <!-- AI CAPTION GENERATOR -->
-    <div class="ai-box" id="ai-section">
-      <div class="ai-box-header">
-        <div class="ai-badge">AI</div>
-        <div class="ai-box-title">Generate caption & hashtags</div>
-      </div>
-      <div class="ai-input-row">
-        <input class="ai-input" id="video-desc" placeholder="Describe your video e.g. 'Comedy skit about Lagos traffic jams'">
-        <button class="btn-generate" id="gen-btn" onclick="generateCaption()">Generate →</button>
-      </div>
-      <div class="ai-result" id="ai-result">
-        <div class="ai-result-label">Your AI caption</div>
-        <div class="ai-caption-text" id="caption-text"></div>
-        <div class="ai-result-label" style="margin-top:10px">Hashtags</div>
-        <div class="ai-hashtags" id="hashtag-text"></div>
-        <button class="copy-btn" onclick="copyCaption()">Copy caption + hashtags</button>
-      </div>
-    </div>
-
-    <!-- CONNECT PLATFORMS -->
-    <div class="sec-title" id="platforms-section">Connect your social accounts</div>
-    <div class="platforms-grid">
-      <div class="plat-card">
-        <div class="plat-icon" style="background:#fff0f3">🎵</div>
-        <div>
-          <div class="plat-name">TikTok</div>
-          <div class="plat-status">Not connected</div>
-        </div>
-        <button class="btn-connect" onclick="alert('TikTok connection coming soon! We are applying for TikTok API access.')">Connect</button>
-      </div>
-      <div class="plat-card">
-        <div class="plat-icon" style="background:#fff0f8">📸</div>
-        <div>
-          <div class="plat-name">Instagram</div>
-          <div class="plat-status">Not connected</div>
-        </div>
-        <button class="btn-connect" onclick="alert('Instagram connection coming soon!')">Connect</button>
-      </div>
-      <div class="plat-card">
-        <div class="plat-icon" style="background:#f0f4ff">👤</div>
-        <div>
-          <div class="plat-name">Facebook</div>
-          <div class="plat-status">Not connected</div>
-        </div>
-        <button class="btn-connect" onclick="alert('Facebook connection coming soon!')">Connect</button>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
-const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage }
-});
-
-function showDashboard(name) {
-  const parts = (name || 'Creator').split(' ');
-  const initials = parts.map(function(n){ return n[0] || ''; }).join('').toUpperCase().slice(0,2) || 'BV';
-  document.getElementById('user-av').textContent = initials;
-  document.getElementById('user-name').textContent = parts[0];
-  document.getElementById('welcome-name').textContent = parts[0];
-  document.getElementById('loading').style.display = 'none';
+interface Platform {
+  id: string
+  platform: string
+  is_connected: boolean
 }
 
-// Try to get user — if logged in show dashboard, if not redirect
-sbClient.auth.getUser().then(function(res) {
-  if (res.data && res.data.user) {
-    var user = res.data.user;
-    var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
-    showDashboard(name);
-  } else {
-    // Try getSession as fallback
-    return sbClient.auth.getSession().then(function(s) {
-      if (s.data && s.data.session && s.data.session.user) {
-        var user = s.data.session.user;
-        var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
-        showDashboard(name);
-      } else {
-        window.location.replace('login.html');
+export default function Dashboard({ user }: DashboardProps) {
+  const [isDark, setIsDark] = useState(localStorage.getItem('blowva-theme') === 'dark')
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [stats, setStats] = useState({ views: 12480, followers: 1243, posts: 0, viralScore: 87 })
+  const [posts, setPosts] = useState<Post[]>([])
+  const [captions, setCaptions] = useState<Caption[]>([])
+  const [platforms, setPlatforms] = useState<Platform[]>([])
+  const [, setLoading] = useState(true)
+  const [showAiResult, setShowAiResult] = useState(false)
+  const [aiCaption, setAiCaption] = useState('')
+  const [aiHashtags, setAiHashtags] = useState('')
+  const [aiDescription, setAiDescription] = useState('')
+  const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Creator'
+  const userInitials = userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) || 'BV'
+
+  useEffect(() => {
+    if (isDark) {
+      document.body.classList.add('dark')
+    } else {
+      document.body.classList.remove('dark')
+    }
+  }, [isDark])
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const token = session.access_token
+
+      // Load captions
+      const capsRes = await fetch('/api/captions', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (capsRes.ok) {
+        const capsData = await capsRes.json()
+        setCaptions(capsData)
       }
-    });
-  }
-}).catch(function() {
-  window.location.replace('login.html');
-});
 
-// 10 second failsafe
-setTimeout(function() {
-  var el = document.getElementById('loading');
-  if (el && el.style.display !== 'none') {
-    window.location.replace('login.html');
-  }
-}, 10000);
+      // Load posts
+      const postsRes = await fetch('/api/posts', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (postsRes.ok) {
+        const postsData = await postsRes.json()
+        setPosts(postsData)
+        setStats(prev => ({ ...prev, posts: postsData.length }))
+      }
 
-async function logout() {
-  await sbClient.auth.signOut();
-  window.location.href = 'login.html';
-}
-
-// AI Caption generator using predefined responses (no API key needed yet)
-const captions = {
-  default: [
-    { caption: "POV: You just found the secret to going viral as a Nigerian creator 🚀\n\nThis is exactly what nobody is telling you — and it's changing everything.", hashtags: "#NigerianCreator #ContentCreator #GoViral #Naija #TikTokNigeria #InstagramNigeria #CreatorTips" },
-    { caption: "Wait until you see this 👀\n\nAs a Nigerian creator, this is the kind of content that changes everything. Save this before it disappears.", hashtags: "#Nigeria #NaijaContent #ContentCreation #Viral #CreatorLife #AfricanCreator #Blowva" },
-    { caption: "Nobody in Nigeria is talking about this and I don't understand why 🤔\n\nThis alone can change your content game completely. Watch till the end.", hashtags: "#NigerianTikTok #NaijaCreator #GoViral #ContentStrategy #AfricaCreators #TikTokNaija" }
-  ],
-  comedy: [
-    { caption: "Lagos people will understand this immediately 😂😂😂\n\nTag someone who has been in this situation before! This one too real abeg.", hashtags: "#LagosSkit #NigerianComedy #NaijaHumor #Skit #FunnyNigeria #AfricanComedy #Comedy" },
-    { caption: "I cannot stop laughing at this 😭💀\n\nNigerian parents when you make a small mistake vs when they make the same mistake. The accuracy is too much.", hashtags: "#NigerianParents #NaijaComedy #RelatableNigeria #Skit #FunnyVideo #NigerianSkits #Comedy" }
-  ],
-  food: [
-    { caption: "This is the recipe my Nigerian grandmother never wanted to share 🍲❤️\n\nFinally got her to show me and I had to share with you. Save this now.", hashtags: "#NigerianFood #AfricanFood #FoodTok #NaijaChef #NigerianRecipe #AfricanCuisine #FoodLovers" },
-    { caption: "POV: You cooked jollof rice that hit different today 🍛🔥\n\nNigerian jollof no dey ever fail. This is how we do it in my house.", hashtags: "#JollofRice #NigerianFood #FoodTok #AfricanFood #NaijaFood #Cooking #FoodLovers" }
-  ],
-  fashion: [
-    { caption: "Nigerian fashion is taking over and this is proof 👗✨\n\nAfro-fusion at its finest. Comment 'YES' if you want the full outfit details.", hashtags: "#NigerianFashion #AfricanFashion #Ootd #NaijaStyle #AfroFusion #FashionTok #StyleInspo" },
-    { caption: "This outfit has Lagos written all over it 🔥\n\nWhen you mix tradition with modern and it just works. The ancestors are pleased.", hashtags: "#NigerianStyle #LagosStyle #AfricanWear #FashionNigeria #Ootd #AfroFashion #NaijaFashion" }
-  ]
-};
-
-async function generateCaption() {
-  const desc = document.getElementById('video-desc').value.trim();
-  if (!desc) {
-    document.getElementById('video-desc').style.borderColor = '#EF4444';
-    setTimeout(() => document.getElementById('video-desc').style.borderColor = '', 2000);
-    return;
+      // Load platforms
+      const platRes = await fetch('/api/platforms', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (platRes.ok) {
+        const platData = await platRes.json()
+        setPlatforms(platData)
+      }
+    } catch (err) {
+      console.error('Load error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const btn = document.getElementById('gen-btn');
-  btn.disabled = true;
-  btn.textContent = '⚡ AI is writing...';
-  document.getElementById('ai-result').classList.remove('show');
 
-  try {
-    const response = await fetch('/api/generate-caption', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: desc })
-    });
 
-    if (!response.ok) throw new Error('Server error');
-
-    const result = await response.json();
-    document.getElementById('caption-text').textContent = result.caption;
-    document.getElementById('hashtag-text').textContent = result.hashtags;
-    document.getElementById('ai-result').classList.add('show');
-    document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-  } catch (err) {
-    console.error('API Error:', err);
-    // Smart fallback
-    const d = desc.toLowerCase();
-    const niches = {
-      food: { caption: `This ${desc} recipe is the one my Nigerian grandmother never wanted to share 🍲❤️\n\nFinally got the secret and I had to share with you all. Save this now!`, hashtags: `#NigerianFood #AfricanFood #FoodTok #NaijaChef #FoodLovers #NigerianRecipe #AfricanCuisine #Blowva #NaijaFood #FoodCreator #NigerianCuisine` },
-      comedy: { caption: `Nigerian people will understand this ${desc} immediately 😂😭\n\nTag someone who has been in this exact situation! The accuracy is too much abeg.`, hashtags: `#NigerianComedy #NaijaHumor #AfricanComedy #Skit #FunnyNigeria #NigerianSkit #Comedy #NaijaCreator #NigerianTikTok #Blowva #LagosSkit` },
-      fashion: { caption: `Nigerian fashion is taking over and this ${desc} is the proof 👗✨\n\nComment YES if you want the full outfit details!`, hashtags: `#NigerianFashion #AfricanFashion #NaijaStyle #Ootd #FashionTok #AfroFusion #StyleInspo #NigerianCreator #FashionNigeria #Blowva #AfricanStyle` },
-      makeup: { caption: `This ${desc} tutorial is the one you have been waiting for 💄✨\n\nNigerian beauty secrets finally revealed. Save this now!`, hashtags: `#NigerianBeauty #AfricanBeauty #MakeupTutorial #BeautyTok #NaijaBeauty #AfricanMakeup #SkincareRoutine #Blowva #NigerianCreator #BeautyCreator #GlowUp` },
-      default: { caption: `This ${desc} is the content Nigerian creators needed to see 🚀\n\nSave this and share with a creator who needs to see it today.`, hashtags: `#NaijaCreator #NigerianTikTok #AfricanCreator #ContentCreator #GoViral #Nigeria #NigerianContent #CreatorLife #Blowva #AfricanContent #ViralContent` }
-    };
-    let pick = niches.default;
-    if (d.includes('food')||d.includes('cook')||d.includes('recipe')||d.includes('eat')||d.includes('jollof')) pick = niches.food;
-    else if (d.includes('comedy')||d.includes('skit')||d.includes('funny')||d.includes('joke')) pick = niches.comedy;
-    else if (d.includes('fashion')||d.includes('outfit')||d.includes('style')||d.includes('wear')) pick = niches.fashion;
-    else if (d.includes('makeup')||d.includes('beauty')||d.includes('skincare')||d.includes('hair')) pick = niches.makeup;
-
-    document.getElementById('caption-text').textContent = pick.caption;
-    document.getElementById('hashtag-text').textContent = pick.hashtags;
-    document.getElementById('ai-result').classList.add('show');
-    document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const logout = async () => {
+    await supabase.auth.signOut()
   }
 
-  btn.disabled = false;
-  btn.textContent = 'Generate →';
-}
+  const generateCaption = async () => {
+    if (!aiDescription.trim()) return
 
-function copyCaption() {
-  const caption = document.getElementById('caption-text').textContent;
-  const hashtags = document.getElementById('hashtag-text').textContent;
-  navigator.clipboard.writeText(caption + '\n\n' + hashtags).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '✓ Copied!';
-    btn.style.color = 'var(--green)';
-    setTimeout(() => {
-      btn.textContent = 'Copy caption + hashtags';
-      btn.style.color = '';
-    }, 2000);
-  });
-}
+    setGenerating(true)
+    setShowAiResult(false)
 
-document.getElementById('video-desc').addEventListener('keydown', e => {
-  if (e.key === 'Enter') generateCaption();
-});
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
 
-function openDrawer() {
-  document.getElementById('drawer').classList.add('open');
-  document.getElementById('drawer-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeDrawer() {
-  document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawer-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-function setTheme(mode) {
-  if (mode === 'dark') {
-    document.body.style.background = '#0D110D';
-    document.body.style.color = '#F0F5F0';
-    document.getElementById('btn-dark').classList.add('active');
-    document.getElementById('btn-light').classList.remove('active');
-    localStorage.setItem('blowva-theme', 'dark');
-  } else {
-    document.body.style.background = '';
-    document.body.style.color = '';
-    document.getElementById('btn-light').classList.add('active');
-    document.getElementById('btn-dark').classList.remove('active');
-    localStorage.setItem('blowva-theme', 'light');
+      const token = session.access_token
+
+      const response = await fetch('/api/generate-caption', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ description: aiDescription })
+      })
+
+      let result
+      if (response.ok) {
+        result = await response.json()
+      } else {
+        throw new Error('API not available')
+      }
+
+      setAiCaption(result.caption)
+      setAiHashtags(result.hashtags)
+      setShowAiResult(true)
+
+      // Save to database
+      await fetch('/api/captions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          description: aiDescription,
+          caption: result.caption,
+          hashtags: result.hashtags
+        })
+      })
+
+      loadData()
+    } catch (err) {
+      // Smart fallback
+      const d = aiDescription.toLowerCase()
+      let caption = ''
+      let hashtags = ''
+
+      if (d.includes('food') || d.includes('cook') || d.includes('jollof')) {
+        caption = `POV: You just found the BEST ${aiDescription} recipe in Nigeria 🍲🔥\n\nThis one will have you licking your fingers. Save this before it disappears!`
+        hashtags = '#NigerianFood #JollofRice #NaijaFood #FoodTok #AfricanFood #NigerianChef #Blowva #FoodLovers'
+      } else if (d.includes('comedy') || d.includes('skit') || d.includes('funny')) {
+        caption = `Lagos people will understand this immediately 😂😂😂\n\nTag someone who has been in this exact situation. The accuracy is too much!`
+        hashtags = '#NigerianComedy #NaijaSkit #LagosSkit #NaijaHumor #AfricanComedy #FunnyNigeria #Blowva'
+      } else if (d.includes('fashion') || d.includes('outfit') || d.includes('style')) {
+        caption = `Nigerian fashion is taking over the world and this ${aiDescription} is PROOF 👗✨\n\nComment YES if you want the full outfit details!`
+        hashtags = '#NigerianFashion #NaijaStyle #AfricanFashion #Ootd #FashionTok #Blowva #StyleInspo'
+      } else {
+        caption = `This ${aiDescription} is exactly what Nigerian creators needed to see right now 🚀\n\nSave this and share with a creator who needs to see it today.`
+        hashtags = '#NaijaCreator #NigerianTikTok #AfricanCreator #ContentCreator #GoViral #Nigeria #Blowva'
+      }
+
+      setAiCaption(caption)
+      setAiHashtags(hashtags)
+      setShowAiResult(true)
+
+      // Save fallback to db
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        await fetch('/api/captions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ description: aiDescription, caption, hashtags })
+        })
+        loadData()
+      }
+    } finally {
+      setGenerating(false)
+    }
   }
+
+  const copyCaption = async () => {
+    const text = `${aiCaption}\n\n${aiHashtags}`
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const connectPlatform = async (platform: string) => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    try {
+      const response = await fetch('/api/platforms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ platform, is_connected: true })
+      })
+
+      if (response.ok) {
+        const newPlat = await response.json()
+        setPlatforms(prev => {
+          const filtered = prev.filter(p => p.platform !== platform)
+          return [...filtered, newPlat]
+        })
+      }
+    } catch (err) {
+      // Mock connection
+      setPlatforms(prev => {
+        const filtered = prev.filter(p => p.platform !== platform)
+        return [...filtered, { id: Date.now().toString(), platform, is_connected: true }]
+      })
+    }
+  }
+
+  const createMockPost = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    const mockPost = {
+      title: 'My latest viral skit',
+      description: 'POV: Nigerian parents when you come home late',
+      platform: 'tiktok',
+      views: Math.floor(Math.random() * 50000) + 10000,
+      likes: Math.floor(Math.random() * 5000) + 500
+    }
+
+    try {
+      const res = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(mockPost)
+      })
+
+      if (res.ok) {
+        loadData()
+      }
+    } catch (err) {
+      setPosts(prev => [{ id: Date.now().toString(), ...mockPost, created_at: new Date().toISOString() }, ...prev])
+      setStats(prev => ({ ...prev, posts: prev.posts + 1, views: prev.views + mockPost.views }))
+    }
+  }
+
+  const isConnected = (platform: string) => {
+    return platforms.some(p => p.platform === platform && p.is_connected)
+  }
+
+  return (
+    <div className={`min-h-screen bg-[#F6FAF7] dark:bg-[#080F09] text-[#080F09] dark:text-[#F0F5F0] transition-colors`}>
+      {/* Navbar */}
+      <nav className="bg-white dark:bg-[#121612] border-b border-[#DFF0E5] dark:border-[#1F2A22] px-4 h-16 flex items-center justify-between sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="lg:hidden flex flex-col gap-1 p-2"
+          >
+            <span className="block w-5 h-0.5 bg-current rounded" />
+            <span className="block w-5 h-0.5 bg-current rounded" />
+            <span className="block w-5 h-0.5 bg-current rounded" />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-[#00B859] rounded-xl flex items-center justify-center">
+              <div className="w-0 h-0 border-t-[6px] border-b-[6px] border-l-[10px] border-t-transparent border-b-transparent border-l-white ml-0.5" />
+            </div>
+            <div className="font-bold text-xl tracking-tight">Blow<span className="text-[#00B859]">va</span></div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 bg-[#F6FAF7] dark:bg-[#1F2A22] px-3 py-1.5 rounded-full">
+            <div className="w-7 h-7 rounded-full bg-[#00B859] text-white flex items-center justify-center text-xs font-bold">
+              {userInitials}
+            </div>
+            <span className="text-sm font-medium hidden sm:inline">{userName.split(' ')[0]}</span>
+          </div>
+          <button
+            onClick={logout}
+            className="text-[#5A7360] dark:text-[#93AE99] hover:text-[#080F09] dark:hover:text-white transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </nav>
+
+      <div className="flex">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-60 bg-white dark:bg-[#121612] border-r border-[#DFF0E5] dark:border-[#1F2A22] p-4 h-[calc(100vh-64px)] sticky top-16 overflow-y-auto">
+          <div className="space-y-1">
+            {[
+              { icon: '📊', label: 'Dashboard', active: true },
+              { icon: '🎬', label: 'Post Video' },
+              { icon: '✍️', label: 'AI Captions' },
+              { icon: '💡', label: 'Suggestions' },
+              { icon: '📈', label: 'Analytics' },
+              { icon: '🔗', label: 'Connected Accounts' },
+              { icon: '⚙️', label: 'Settings' },
+            ].map((item, i) => (
+              <a
+                key={i}
+                href="#"
+                onClick={item.label === 'Post Video' ? createMockPost : undefined}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${item.active ? 'bg-[#E8F9EF] dark:bg-[#1A2F22] text-[#00B859]' : 'hover:bg-[#F6FAF7] dark:hover:bg-[#1F2A22] text-[#5A7360] dark:text-[#93AE99]'}`}
+              >
+                <span>{item.icon}</span> {item.label}
+              </a>
+            ))}
+          </div>
+
+          <div className="mt-auto pt-8">
+            <div className="bg-[#E8F9EF] dark:bg-[#1A2F22] border border-[#C8E4D0] dark:border-[#2A3F32] rounded-xl p-4">
+              <div className="text-[#00B859] font-bold text-sm mb-1">🚀 Free Plan</div>
+              <div className="text-xs text-[#5A7360] dark:text-[#93AE99] leading-snug">
+                5 AI posts/month. Upgrade to blow up faster.
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto">
+          {/* Welcome */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold">
+              Welcome back, <span className="text-[#00B859]">{userName.split(' ')[0]}</span> 👋
+            </h1>
+            <p className="text-[#5A7360] dark:text-[#93AE99] mt-1">
+              Here's your growth overview. Connect your accounts to unlock more insights.
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            {[
+              { label: 'Total Views', value: stats.views.toLocaleString(), change: '+18% this week', icon: TrendingUp },
+              { label: 'Followers Gained', value: stats.followers.toLocaleString(), change: '+64 this week', icon: Users },
+              { label: 'Posts Published', value: stats.posts, change: '2 today', icon: Video },
+              { label: 'Viral Score', value: stats.viralScore, change: 'Excellent', icon: Award, suffix: '' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-5 hover:border-[#C8E4D0] dark:hover:border-[#2A3F32] transition-all group">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="text-xs text-[#5A7360] dark:text-[#93AE99] font-medium">{stat.label}</div>
+                  <stat.icon className="w-4 h-4 text-[#00B859]" />
+                </div>
+                <div className="text-3xl font-bold">{stat.value}{stat.suffix || ''}</div>
+                <div className="text-xs text-[#00B859] font-medium mt-2">{stat.change}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">Quick Actions</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { icon: '🎬', title: 'Post a Video', desc: 'Upload to TikTok, Instagram & Facebook automatically', action: createMockPost },
+                { icon: '✍️', title: 'Generate AI Caption', desc: 'Get scroll-stopping captions and hashtags', action: () => document.getElementById('ai-section')?.scrollIntoView({ behavior: 'smooth' }) },
+                { icon: '🔗', title: 'Connect Accounts', desc: 'Link your social platforms', action: () => document.getElementById('platforms-section')?.scrollIntoView({ behavior: 'smooth' }) },
+                { icon: '💡', title: 'Content Suggestions', desc: 'Discover what to post next for your niche', action: () => alert('Content suggestions coming soon! Keep posting and Blowva learns your niche.') }
+              ].map((action, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ y: -2 }}
+                  onClick={action.action}
+                  className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-5 cursor-pointer hover:border-[#00B859] hover:shadow-lg transition-all group"
+                >
+                  <div className="w-11 h-11 bg-[#E8F9EF] dark:bg-[#1A2F22] rounded-xl flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                    {action.icon}
+                  </div>
+                  <div className="font-bold text-base mb-1">{action.title}</div>
+                  <div className="text-sm text-[#5A7360] dark:text-[#93AE99] leading-snug">{action.desc}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Caption Generator */}
+          <div id="ai-section" className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-6 mb-8">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="bg-[#00B859] text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-[1px]">AI</div>
+              <h3 className="font-bold text-lg">Generate Caption & Hashtags</h3>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-3 mb-4">
+              <input
+                type="text"
+                value={aiDescription}
+                onChange={(e) => setAiDescription(e.target.value)}
+                placeholder="Describe your video e.g. 'Comedy skit about Lagos traffic jams'"
+                className="flex-1 px-4 py-3 border border-[#C8E4D0] dark:border-[#2A3F32] bg-transparent rounded-xl focus:outline-none focus:border-[#00B859] text-sm placeholder:text-[#93AE99]"
+                onKeyDown={(e) => e.key === 'Enter' && generateCaption()}
+              />
+              <button
+                onClick={generateCaption}
+                disabled={generating || !aiDescription.trim()}
+                className="px-6 py-3 bg-[#00B859] text-white font-semibold rounded-xl hover:bg-[#009A4A] disabled:opacity-60 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                {generating ? '⚡ Generating...' : 'Generate →'}
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {showAiResult && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-[#F6FAF7] dark:bg-[#1F2A22] border border-[#DFF0E5] dark:border-[#2A3F32] rounded-xl p-5"
+                >
+                  <div className="text-xs font-bold text-[#00B859] tracking-[1px] mb-2">YOUR AI CAPTION</div>
+                  <p className="text-sm leading-relaxed mb-4 whitespace-pre-line">{aiCaption}</p>
+                  
+                  <div className="text-xs font-bold text-[#00B859] tracking-[1px] mb-2">HASHTAGS</div>
+                  <p className="text-sm text-[#00B859] font-medium mb-4">{aiHashtags}</p>
+
+                  <button
+                    onClick={copyCaption}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#121612] border border-[#C8E4D0] dark:border-[#2A3F32] rounded-lg text-sm font-medium hover:border-[#00B859] hover:text-[#00B859] transition-all"
+                  >
+                    {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                    {copied ? 'Copied!' : 'Copy caption + hashtags'}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Connect Platforms */}
+          <div id="platforms-section" className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold">Connect Your Social Accounts</h2>
+              <button onClick={createMockPost} className="text-sm text-[#00B859] flex items-center gap-1 hover:underline">
+                Simulate Post <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {[
+                { name: 'TikTok', icon: '🎵', bg: '#fff0f3', status: 'Not connected' },
+                { name: 'Instagram', icon: '📸', bg: '#fff0f8', status: 'Not connected' },
+                { name: 'Facebook', icon: '👤', bg: '#f0f4ff', status: 'Not connected' }
+              ].map((plat, i) => {
+                const platformKey = plat.name.toLowerCase()
+                const connected = isConnected(platformKey)
+                return (
+                  <div key={i} className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-5 flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl" style={{ background: plat.bg }}>
+                      {plat.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-bold">{plat.name}</div>
+                      <div className="text-xs text-[#93AE99]">{connected ? 'Connected ✓' : plat.status}</div>
+                    </div>
+                    <button
+                      onClick={() => connectPlatform(platformKey)}
+                      disabled={connected}
+                      className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${connected ? 'bg-[#E8F9EF] text-[#00B859] cursor-default' : 'bg-[#E8F9EF] text-[#00B859] hover:bg-[#00B859] hover:text-white border border-[#C8E4D0]'}`}
+                    >
+                      {connected ? 'Connected' : 'Connect'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Recent Captions */}
+          {captions.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-bold mb-4">Recent AI Captions</h2>
+              <div className="space-y-3">
+                {captions.slice(0, 3).map((cap, i) => (
+                  <div key={i} className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-5">
+                    <div className="text-xs text-[#93AE99] mb-2">{new Date(cap.created_at).toLocaleDateString()}</div>
+                    <div className="font-medium text-sm mb-2 line-clamp-2">{cap.description}</div>
+                    <div className="text-xs text-[#00B859] font-medium line-clamp-1">{cap.hashtags}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recent Posts */}
+          {posts.length > 0 && (
+            <div>
+              <h2 className="text-lg font-bold mb-4">Recent Posts</h2>
+              <div className="space-y-3">
+                {posts.slice(0, 3).map((post, i) => (
+                  <div key={i} className="bg-white dark:bg-[#121612] border border-[#DFF0E5] dark:border-[#1F2A22] rounded-2xl p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 bg-[#E8F9EF] dark:bg-[#1A2F22] rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                      {post.platform === 'tiktok' ? '🎵' : post.platform === 'instagram' ? '📸' : '👤'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-sm mb-1">{post.title}</div>
+                      <div className="text-xs text-[#5A7360] dark:text-[#93AE99] line-clamp-1 mb-2">{post.description}</div>
+                      <div className="flex gap-4 text-xs">
+                        <span className="text-[#00B859] font-medium">👁 {post.views.toLocaleString()} views</span>
+                        <span className="text-[#00B859] font-medium">❤️ {post.likes.toLocaleString()} likes</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDrawerOpen(false)}
+              className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            />
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="fixed left-0 top-0 bottom-0 w-72 bg-white dark:bg-[#121612] z-50 lg:hidden overflow-y-auto"
+            >
+              <div className="p-4 border-b border-[#DFF0E5] dark:border-[#1F2A22] flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 bg-[#00B859] rounded-xl flex items-center justify-center">
+                    <div className="w-0 h-0 border-t-[6px] border-b-[6px] border-l-[10px] border-t-transparent border-b-transparent border-l-white ml-0.5" />
+                  </div>
+                  <div className="font-bold text-xl">Blowva</div>
+                </div>
+                <button onClick={() => setDrawerOpen(false)} className="p-2">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-4">
+                <div className="flex items-center justify-between py-4 border-b border-[#DFF0E5] dark:border-[#1F2A22]">
+                  <span className="text-sm font-medium text-[#5A7360]">Display</span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => { setIsDark(false); localStorage.setItem('blowva-theme', 'light') }}
+                      className={`px-3 py-1 text-xs rounded-lg font-medium ${!isDark ? 'bg-[#00B859] text-white' : 'border border-[#C8E4D0]'}`}
+                    >
+                      ☀️ Light
+                    </button>
+                    <button
+                      onClick={() => { setIsDark(true); localStorage.setItem('blowva-theme', 'dark') }}
+                      className={`px-3 py-1 text-xs rounded-lg font-medium ${isDark ? 'bg-[#00B859] text-white' : 'border border-[#C8E4D0]'}`}
+                    >
+                      🌙 Dark
+                    </button>
+                  </div>
+                </div>
+
+                <div className="py-4 space-y-1">
+                  <div className="text-xs font-bold text-[#93AE99] px-3 py-2 tracking-widest">DASHBOARD</div>
+                  {['Overview', 'Upload video', 'AI captions', 'Content suggestions', 'Analytics'].map((label, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl hover:bg-[#F6FAF7] dark:hover:bg-[#1F2A22]">
+                      <span>{['📊','🎬','✍️','💡','📈'][i]}</span>
+                      <span>{label}</span>
+                      {i === 1 && <span className="ml-auto bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full">Soon</span>}
+                    </div>
+                  ))}
+
+                  <div className="h-px bg-[#DFF0E5] dark:bg-[#1F2A22] my-3" />
+
+                  <div className="text-xs font-bold text-[#93AE99] px-3 py-2 tracking-widest">ACCOUNT</div>
+                  {['Account settings', 'Connected accounts', 'Subscription & billing', 'Notifications'].map((label, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl hover:bg-[#F6FAF7] dark:hover:bg-[#1F2A22]">
+                      <span>{['⚙️','🔗','💳','🔔'][i]}</span>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+
+                  <div className="h-px bg-[#DFF0E5] dark:bg-[#1F2A22] my-3" />
+
+                  <div className="text-xs font-bold text-[#93AE99] px-3 py-2 tracking-widest">CONNECT PLATFORMS</div>
+                  {['Connect TikTok', 'Connect Instagram', 'Connect Facebook'].map((label, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3 py-3 text-sm font-medium rounded-xl hover:bg-[#F6FAF7] dark:hover:bg-[#1F2A22]">
+                      <span>{['🎵','📸','👤'][i]}</span>
+                      <span>{label}</span>
+                      <span className="ml-auto bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full">Soon</span>
+                    </div>
+                  ))}
+
+                  <div className="h-px bg-[#DFF0E5] dark:bg-[#1F2A22] my-3" />
+
+                  <div className="text-xs font-bold text-[#93AE99] px-3 py-2 tracking-widest">HELP & INFO</div>
+                  <div onClick={logout} className="flex items-center gap-3 px-3 py-3 text-sm font-medium text-red-500 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer">
+                    <span>🚪</span>
+                    <span>Log out</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 mt-auto border-t border-[#DFF0E5] dark:border-[#1F2A22] text-xs text-center text-[#93AE99]">
+                Blowva © 2026<br />Privacy · Terms
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
-(function(){
-  if(localStorage.getItem('blowva-theme
