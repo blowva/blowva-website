@@ -594,40 +594,44 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: window.localStorage }
 });
 
-function loadUser(user) {
-  const name = user.user_metadata && user.user_metadata.full_name ? user.user_metadata.full_name : user.email.split('@')[0];
-  const parts = name.split(' ');
-  const initials = parts.map(function(n){ return n[0]; }).join('').toUpperCase().slice(0,2);
+function showDashboard(name) {
+  const parts = (name || 'Creator').split(' ');
+  const initials = parts.map(function(n){ return n[0] || ''; }).join('').toUpperCase().slice(0,2) || 'BV';
   document.getElementById('user-av').textContent = initials;
   document.getElementById('user-name').textContent = parts[0];
   document.getElementById('welcome-name').textContent = parts[0];
   document.getElementById('loading').style.display = 'none';
 }
 
-sbClient.auth.onAuthStateChange(function(event, session) {
-  if (session && session.user) {
-    loadUser(session.user);
-  } else if (!session) {
-    window.location.replace('login.html');
+// Try to get user — if logged in show dashboard, if not redirect
+sbClient.auth.getUser().then(function(res) {
+  if (res.data && res.data.user) {
+    var user = res.data.user;
+    var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
+    showDashboard(name);
+  } else {
+    // Try getSession as fallback
+    return sbClient.auth.getSession().then(function(s) {
+      if (s.data && s.data.session && s.data.session.user) {
+        var user = s.data.session.user;
+        var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : user.email.split('@')[0];
+        showDashboard(name);
+      } else {
+        window.location.replace('login.html');
+      }
+    });
   }
-});
-
-sbClient.auth.getSession().then(function(res) {
-  if (res.error || !res.data.session) {
-    window.location.replace('login.html');
-    return;
-  }
-  loadUser(res.data.session.user);
 }).catch(function() {
   window.location.replace('login.html');
 });
 
+// 10 second failsafe
 setTimeout(function() {
-  var loading = document.getElementById('loading');
-  if (loading && loading.style.display !== 'none') {
+  var el = document.getElementById('loading');
+  if (el && el.style.display !== 'none') {
     window.location.replace('login.html');
   }
-}, 8000);
+}, 10000);
 
 async function logout() {
   await sbClient.auth.signOut();
