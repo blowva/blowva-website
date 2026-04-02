@@ -231,8 +231,12 @@ nav{
 }
 .ai-box-title{font-size:0.95rem;font-weight:800;color:var(--black);}
 .ai-input-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
-.ai-input{
-  flex:1;min-width:200px;
+.ai-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.ai-field{display:flex;flex-direction:column;gap:4px;}
+.ai-field-label{font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:0.3px;}
+.ai-field-label .req{color:#EF4444;margin-left:2px;}
+.ai-input,.ai-select{
+  width:100%;
   padding:0.75rem 1rem;
   border:1.5px solid var(--border2);
   border-radius:10px;font-size:0.88rem;
@@ -240,6 +244,11 @@ nav{
   color:var(--black);outline:none;
   background:var(--white);
   transition:border-color 0.2s;
+}
+.ai-input{flex:1;min-width:200px;}
+.ai-select{appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2393AE99' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
 }
 .ai-input:focus{border-color:var(--green);}
 .ai-input::placeholder{color:var(--muted2);}
@@ -560,11 +569,54 @@ nav{
         <div class="ai-badge">AI</div>
         <div class="ai-box-title">Generate caption &amp; hashtags</div>
       </div>
-      <div class="ai-input-row">
-        <input class="ai-input" id="video-desc" placeholder="Describe your video e.g. 'Comedy skit about Lagos traffic jams'">
-        <button class="btn-generate" id="gen-btn" onclick="generateCaption()">Generate &rarr;</button>
+
+      <div class="ai-field" style="margin-bottom:12px;">
+        <div class="ai-field-label">Describe your video<span class="req">*</span></div>
+        <input class="ai-input" id="video-desc" placeholder="e.g. 'Comedy skit about Lagos traffic jams'" style="min-width:0;width:100%;">
       </div>
-      <div class="ai-result" id="ai-result">
+
+      <div class="ai-fields">
+        <div class="ai-field">
+          <div class="ai-field-label">State &amp; City<span class="req">*</span></div>
+          <input class="ai-input" id="ai-location" placeholder="e.g. Lagos, Ikeja" style="min-width:0;">
+        </div>
+        <div class="ai-field">
+          <div class="ai-field-label">Your niche<span class="req">*</span></div>
+          <input class="ai-input" id="ai-niche" placeholder="e.g. Comedy, Food, Tech" style="min-width:0;">
+        </div>
+        <div class="ai-field">
+          <div class="ai-field-label">Video type<span class="req">*</span></div>
+          <select class="ai-select" id="ai-video-type">
+            <option value="" disabled selected>Select type</option>
+            <option value="Vlog">Vlog</option>
+            <option value="Explanatory">Explanatory</option>
+            <option value="Product review">Product review</option>
+            <option value="Teaching video">Teaching video</option>
+            <option value="Car advert">Car advert</option>
+            <option value="POV">POV</option>
+            <option value="Comedy skit">Comedy skit</option>
+            <option value="Dance video">Dance video</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <div class="ai-field-label">Platform<span class="req">*</span></div>
+          <select class="ai-select" id="ai-platform">
+            <option value="" disabled selected>Select platform</option>
+            <option value="TikTok">TikTok</option>
+            <option value="Instagram Reels">Instagram Reels</option>
+            <option value="Instagram Feed">Instagram Feed</option>
+            <option value="Facebook">Facebook</option>
+            <option value="YouTube Shorts">YouTube Shorts</option>
+            <option value="YouTube">YouTube</option>
+            <option value="X (Twitter)">X (Twitter)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="gen-btn" onclick="generateCaption()" style="width:100%;">Generate &rarr;</button>
+
+      <div class="ai-result" id="ai-result" style="margin-top:12px;">
         <div class="ai-result-label">Your AI caption</div>
         <div class="ai-caption-text" id="caption-text"></div>
         <div class="ai-result-label" style="margin-top:10px">Hashtags</div>
@@ -694,22 +746,45 @@ async function logout() {
    ============================================= */
 async function generateCaption() {
   var desc = document.getElementById('video-desc').value.trim();
-  if (!desc) {
-    document.getElementById('video-desc').style.borderColor = '#EF4444';
-    setTimeout(function(){ document.getElementById('video-desc').style.borderColor = ''; }, 2000);
-    return;
+  var location = document.getElementById('ai-location').value.trim();
+  var niche = document.getElementById('ai-niche').value.trim();
+  var videoType = document.getElementById('ai-video-type').value;
+  var platform = document.getElementById('ai-platform').value;
+
+  // Validate all required fields
+  var hasError = false;
+  function markError(id) {
+    var el = document.getElementById(id);
+    el.style.borderColor = '#EF4444';
+    setTimeout(function(){ el.style.borderColor = ''; }, 2500);
+    hasError = true;
   }
+  if (!desc) markError('video-desc');
+  if (!location) markError('ai-location');
+  if (!niche) markError('ai-niche');
+  if (!videoType) markError('ai-video-type');
+  if (!platform) markError('ai-platform');
+  if (hasError) return;
 
   var btn = document.getElementById('gen-btn');
   btn.disabled = true;
   btn.textContent = '\u26A1 AI is writing...';
   document.getElementById('ai-result').classList.remove('show');
 
+  // Build rich prompt with all context
+  var fullPrompt = desc + ' | Location: ' + location + ' | Niche: ' + niche + ' | Video type: ' + videoType + ' | Platform: ' + platform;
+
   try {
     var response = await fetch('/api/generate-caption', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: desc })
+      body: JSON.stringify({
+        description: desc,
+        location: location,
+        niche: niche,
+        videoType: videoType,
+        platform: platform
+      })
     });
 
     if (!response.ok) throw new Error('Server error');
@@ -723,39 +798,32 @@ async function generateCaption() {
   } catch (err) {
     console.error('API Error:', err);
 
-    // Smart fallback captions by niche
-    var d = desc.toLowerCase();
-    var niches = {
-      food: {
-        caption: 'This ' + desc + ' recipe is the one my Nigerian grandmother never wanted to share \uD83C\uDF72\u2764\uFE0F\n\nFinally got the secret and I had to share with you all. Save this now!',
-        hashtags: '#NigerianFood #AfricanFood #FoodTok #NaijaChef #FoodLovers #NigerianRecipe #AfricanCuisine #Blowva #NaijaFood #FoodCreator #NigerianCuisine'
-      },
-      comedy: {
-        caption: 'Nigerian people will understand this ' + desc + ' immediately \uD83D\uDE02\uD83D\uDE2D\n\nTag someone who has been in this exact situation! The accuracy is too much abeg.',
-        hashtags: '#NigerianComedy #NaijaHumor #AfricanComedy #Skit #FunnyNigeria #NigerianSkit #Comedy #NaijaCreator #NigerianTikTok #Blowva #LagosSkit'
-      },
-      fashion: {
-        caption: 'Nigerian fashion is taking over and this ' + desc + ' is the proof \uD83D\uDC57\u2728\n\nComment YES if you want the full outfit details!',
-        hashtags: '#NigerianFashion #AfricanFashion #NaijaStyle #Ootd #FashionTok #AfroFusion #StyleInspo #NigerianCreator #FashionNigeria #Blowva #AfricanStyle'
-      },
-      makeup: {
-        caption: 'This ' + desc + ' tutorial is the one you have been waiting for \uD83D\uDC84\u2728\n\nNigerian beauty secrets finally revealed. Save this now!',
-        hashtags: '#NigerianBeauty #AfricanBeauty #MakeupTutorial #BeautyTok #NaijaBeauty #AfricanMakeup #SkincareRoutine #Blowva #NigerianCreator #BeautyCreator #GlowUp'
-      },
-      default: {
-        caption: 'This ' + desc + ' is the content Nigerian creators needed to see \uD83D\uDE80\n\nSave this and share with a creator who needs to see it today.',
-        hashtags: '#NaijaCreator #NigerianTikTok #AfricanCreator #ContentCreator #GoViral #Nigeria #NigerianContent #CreatorLife #Blowva #AfricanContent #ViralContent'
-      }
-    };
+    // Smart fallback using all fields
+    var platformTag = platform.replace(/\s+/g,'').replace(/[()]/g,'');
+    var locationCity = location.split(',')[0].trim();
+    var caption = '';
+    var hashtags = '';
 
-    var pick = niches.default;
-    if (d.includes('food')||d.includes('cook')||d.includes('recipe')||d.includes('eat')||d.includes('jollof')) pick = niches.food;
-    else if (d.includes('comedy')||d.includes('skit')||d.includes('funny')||d.includes('joke')) pick = niches.comedy;
-    else if (d.includes('fashion')||d.includes('outfit')||d.includes('style')||d.includes('wear')) pick = niches.fashion;
-    else if (d.includes('makeup')||d.includes('beauty')||d.includes('skincare')||d.includes('hair')) pick = niches.makeup;
+    if (videoType === 'POV') {
+      caption = 'POV: You are in ' + locationCity + ' and you see this ' + desc + ' \uD83D\uDE02\uD83D\uDD25\n\nOnly ' + niche + ' creators from ' + locationCity + ' will understand this one. Save it!';
+    } else if (videoType === 'Product review') {
+      caption = 'HONEST REVIEW: ' + desc + ' \uD83D\uDCF1\u2728\n\nAs a ' + niche + ' creator based in ' + locationCity + ', I had to test this for you. Watch till the end for my final verdict!';
+    } else if (videoType === 'Teaching video' || videoType === 'Explanatory') {
+      caption = 'I wish someone taught me this earlier \uD83D\uDCA1\n\n' + desc + ' explained in a way that actually makes sense. ' + niche + ' creators in ' + locationCity + ', you need this!';
+    } else if (videoType === 'Car advert') {
+      caption = 'This ride just hit different in ' + locationCity + ' \uD83D\uDE97\uD83D\uDD25\n\n' + desc + ' \u2014 if you are looking for the best car deals, you already know where to find us!';
+    } else if (videoType === 'Comedy skit') {
+      caption = locationCity + ' people will understand this immediately \uD83D\uDE02\uD83D\uDE2D\n\n' + desc + ' \u2014 Tag someone who has been in this exact situation! The accuracy is too much abeg.';
+    } else if (videoType === 'Dance video') {
+      caption = 'This dance is taking over ' + locationCity + ' \uD83D\uDD7A\uD83D\uDD25\n\n' + desc + ' \u2014 Drop a \uD83D\uDD25 if you can do this!';
+    } else {
+      caption = desc + ' \uD83D\uDE80\n\n' + niche + ' content from ' + locationCity + ' that you did not know you needed. Save this and thank me later!';
+    }
 
-    document.getElementById('caption-text').textContent = pick.caption;
-    document.getElementById('hashtag-text').textContent = pick.hashtags;
+    hashtags = '#' + niche.replace(/\s+/g,'') + ' #' + locationCity.replace(/\s+/g,'') + ' #' + platformTag + ' #NigerianCreator #Blowva #GoViral #' + videoType.replace(/\s+/g,'') + ' #NaijaContent #AfricanCreator #ContentCreator #Nigeria';
+
+    document.getElementById('caption-text').textContent = caption;
+    document.getElementById('hashtag-text').textContent = hashtags;
     document.getElementById('ai-result').classList.add('show');
     document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
