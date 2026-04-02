@@ -284,9 +284,104 @@ nav{
   .stats-grid{grid-template-columns:1fr 1fr;}
   .quick-grid{grid-template-columns:1fr 1fr;}
 }
+
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.drawer-overlay.open{opacity:1;pointer-events:all;}
+.drawer{position:fixed;top:0;left:-300px;width:280px;height:100vh;background:var(--white);z-index:400;transition:left 0.3s ease;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;}
+.drawer.open{left:0;}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:2;}
+.drawer-logo{display:flex;align-items:center;gap:8px;}
+.drawer-logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.drawer-logo-arrow{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #fff;margin-left:2px;}
+.drawer-logo-text{font-size:1.1rem;font-weight:800;color:var(--black);}
+.drawer-logo-text span{color:var(--green);}
+.drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.drawer-close:hover{background:var(--off);}
+.theme-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--off);}
+.theme-label{font-size:.82rem;font-weight:600;color:var(--muted);}
+.theme-btns{display:flex;gap:6px;}
+.theme-btn{padding:4px 12px;border-radius:7px;font-size:.75rem;font-weight:700;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;}
+.theme-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+.drawer-section{padding:.6rem 0;}
+.drawer-section-title{font-size:.65rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;padding:.4rem 1.25rem .3rem;}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:.75rem 1.25rem;font-size:.9rem;font-weight:500;color:var(--black);text-decoration:none;transition:background 0.15s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;}
+.drawer-item:hover{background:var(--green-light);}
+.drawer-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center;}
+.drawer-item-text{flex:1;}
+.drawer-item-badge{font-size:.65rem;font-weight:700;background:var(--green);color:#fff;padding:2px 7px;border-radius:999px;}
+.drawer-item-badge.warn{background:#F59E0B;}
+.drawer-divider{height:1px;background:var(--border);margin:.4rem 0;}
+.drawer-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border);background:var(--off);}
+.drawer-footer-text{font-size:.72rem;color:var(--muted2);text-align:center;line-height:1.6;}
+.drawer-footer-text a{color:var(--green);text-decoration:none;font-weight:500;}
+.hamburger-dash{display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s;}
+.hamburger-dash:hover{background:var(--off);}
+.hamburger-dash span{display:block;width:20px;height:2px;background:var(--black);border-radius:2px;}
 </style>
 </head>
 <body>
+
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-logo">
+      <div class="drawer-logo-icon"><div class="drawer-logo-arrow"></div></div>
+      <div class="drawer-logo-text">Blow<span>va</span></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <div class="theme-row">
+    <div class="theme-label">Display</div>
+    <div class="theme-btns">
+      <button class="theme-btn active" id="btn-light" onclick="setTheme('light')">☀️ Light</button>
+      <button class="theme-btn" id="btn-dark" onclick="setTheme('dark')">🌙 Dark</button>
+    </div>
+  </div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-title">Dashboard</div>
+    <a class="drawer-item" href="dashboard.html"><span class="drawer-icon">📊</span><span class="drawer-item-text">Overview</span></a>
+    <div class="drawer-item"><span class="drawer-icon">🎬</span><span class="drawer-item-text">Upload video</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item"><span class="drawer-icon">✍️</span><span class="drawer-item-text">AI captions</span></div>
+    <div class="drawer-item"><span class="drawer-icon">💡</span><span class="drawer-item-text">Content suggestions</span></div>
+    <div class="drawer-item"><span class="drawer-icon">📈</span><span class="drawer-item-text">Analytics</span></div>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-title">Account</div>
+    <div class="drawer-item"><span class="drawer-icon">⚙️</span><span class="drawer-item-text">Account settings</span></div>
+    <div class="drawer-item"><span class="drawer-icon">🔗</span><span class="drawer-item-text">Connected accounts</span></div>
+    <div class="drawer-item"><span class="drawer-icon">💳</span><span class="drawer-item-text">Subscription & billing</span></div>
+    <div class="drawer-item"><span class="drawer-icon">🔔</span><span class="drawer-item-text">Notifications</span></div>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-title">Connect Platforms</div>
+    <div class="drawer-item"><span class="drawer-icon">🎵</span><span class="drawer-item-text">Connect TikTok</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item"><span class="drawer-icon">📸</span><span class="drawer-item-text">Connect Instagram</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item"><span class="drawer-icon">👤</span><span class="drawer-item-text">Connect Facebook</span><span class="drawer-item-badge warn">Soon</span></div>
+  </div>
+
+  <div class="drawer-divider"></div>
+
+  <div class="drawer-section">
+    <div class="drawer-section-title">Help & Info</div>
+    <a class="drawer-item" href="index.html"><span class="drawer-icon">🏠</span><span class="drawer-item-text">Back to home</span></a>
+    <a class="drawer-item" href="privacy.html"><span class="drawer-icon">🔒</span><span class="drawer-item-text">Privacy Policy</span></a>
+    <a class="drawer-item" href="terms.html"><span class="drawer-icon">📄</span><span class="drawer-item-text">Terms of Service</span></a>
+    <a class="drawer-item" href="mailto:hello@blowva.com"><span class="drawer-icon">✉️</span><span class="drawer-item-text">Contact support</span></a>
+    <div class="drawer-item" onclick="logout()"><span class="drawer-icon">🚪</span><span class="drawer-item-text" style="color:#EF4444">Log out</span></div>
+  </div>
+
+  <div class="drawer-footer">
+    <div class="drawer-footer-text">Blowva © 2026<br><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></div>
+  </div>
+</div>
 
 <!-- LOADING -->
 <div class="loading" id="loading">
@@ -301,6 +396,9 @@ nav{
     <div class="logo-text">Blow<span>va</span></div>
   </a>
   <div class="nav-right">
+    <button class="hamburger-dash" onclick="openDrawer()">
+      <span></span><span></span><span></span>
+    </button>
     <div class="user-pill">
       <div class="user-av" id="user-av">?</div>
       <div class="user-name" id="user-name">Loading...</div>
@@ -510,40 +608,46 @@ async function generateCaption() {
   btn.textContent = '⚡ AI is writing...';
   document.getElementById('ai-result').classList.remove('show');
 
-  // Smart local AI caption generator
-  const d = desc.toLowerCase();
-  const templates = [
-    { caption: `POV: Nigerian creators finally have a secret weapon 🚀🔥\n\nThis is exactly what ${desc} looks like when done right. Save this before it disappears.`, hashtags: `#NaijaCreator #NigerianTikTok #AfricanCreator #GoViral #ContentCreator #Nigeria #NigerianContent #CreatorLife #Blowva #AfricanContent #ViralContent` },
-    { caption: `Nobody in Nigeria is talking about this ${desc} and I don't understand why 👀\n\nWatch till the end — this changes everything for creators like us.`, hashtags: `#NigerianCreator #NaijaContent #GoViral #ContentStrategy #AfricaCreators #TikTokNaija #NigerianTikTok #Blowva #CreatorTips #ViralNigeria` },
-    { caption: `This ${desc} hit different and I had to share it with you 💯\n\nTag a Nigerian creator who needs to see this right now!`, hashtags: `#Nigeria #NaijaCreator #AfricanCreator #ContentCreation #Viral #CreatorLife #NigerianContent #Blowva #NigerianTikTok #AfricanContent #GoViral` }
-  ];
+  try {
+    const response = await fetch('/api/generate-caption', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: desc })
+    });
 
-  // Niche-specific captions
-  if (d.includes('food')||d.includes('cook')||d.includes('recipe')||d.includes('eat')||d.includes('jollof')) {
-    templates.unshift({ caption: `This ${desc} recipe is the one my Nigerian grandmother never wanted to share 🍲❤️\n\nFinally got the secret and I had to share with you all. Save this now!`, hashtags: `#NigerianFood #AfricanFood #FoodTok #NaijaChef #FoodLovers #NigerianRecipe #AfricanCuisine #Blowva #NaijaFood #FoodCreator #NigerianCuisine` });
-  }
-  if (d.includes('comedy')||d.includes('skit')||d.includes('funny')||d.includes('joke')||d.includes('laugh')) {
-    templates.unshift({ caption: `Nigerian people will understand this ${desc} immediately 😂😭\n\nTag someone who has been in this exact situation! The accuracy is too much abeg.`, hashtags: `#NigerianComedy #NaijaHumor #AfricanComedy #Skit #FunnyNigeria #NigerianSkit #Comedy #NaijaCreator #NigerianTikTok #Blowva #LagosSkit` });
-  }
-  if (d.includes('fashion')||d.includes('outfit')||d.includes('style')||d.includes('wear')||d.includes('cloth')) {
-    templates.unshift({ caption: `Nigerian fashion is taking over and this ${desc} is the proof 👗✨\n\nComment YES if you want the full outfit details!`, hashtags: `#NigerianFashion #AfricanFashion #NaijaStyle #Ootd #FashionTok #AfroFusion #StyleInspo #NigerianCreator #FashionNigeria #Blowva #AfricanStyle` });
-  }
-  if (d.includes('makeup')||d.includes('beauty')||d.includes('skincare')||d.includes('hair')) {
-    templates.unshift({ caption: `This ${desc} tutorial is the one you have been waiting for 💄✨\n\nNigerian beauty secrets finally revealed. Save this now!`, hashtags: `#NigerianBeauty #AfricanBeauty #MakeupTutorial #BeautyTok #NaijaBeauty #AfricanMakeup #SkincareRoutine #Blowva #NigerianCreator #BeautyCreator #GlowUp` });
-  }
-  if (d.includes('dance')||d.includes('music')||d.includes('afrobeats')||d.includes('song')) {
-    templates.unshift({ caption: `This ${desc} just changed my whole day 🎵🔥\n\nNigerian music and dance never misses. Join in!`, hashtags: `#AfroBeats #NigerianMusic #DanceTok #NaijaVibes #AfricanDance #NigerianDance #MusicCreator #Blowva #NigerianTikTok #AfroNation #DanceChallenge` });
-  }
+    if (!response.ok) throw new Error('Server error');
 
-  setTimeout(() => {
-    const result = templates[Math.floor(Math.random() * Math.min(templates.length, 2))];
+    const result = await response.json();
     document.getElementById('caption-text').textContent = result.caption;
     document.getElementById('hashtag-text').textContent = result.hashtags;
     document.getElementById('ai-result').classList.add('show');
-    btn.disabled = false;
-    btn.textContent = 'Generate →';
     document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }, 1200);
+
+  } catch (err) {
+    console.error('API Error:', err);
+    // Smart fallback
+    const d = desc.toLowerCase();
+    const niches = {
+      food: { caption: `This ${desc} recipe is the one my Nigerian grandmother never wanted to share 🍲❤️\n\nFinally got the secret and I had to share with you all. Save this now!`, hashtags: `#NigerianFood #AfricanFood #FoodTok #NaijaChef #FoodLovers #NigerianRecipe #AfricanCuisine #Blowva #NaijaFood #FoodCreator #NigerianCuisine` },
+      comedy: { caption: `Nigerian people will understand this ${desc} immediately 😂😭\n\nTag someone who has been in this exact situation! The accuracy is too much abeg.`, hashtags: `#NigerianComedy #NaijaHumor #AfricanComedy #Skit #FunnyNigeria #NigerianSkit #Comedy #NaijaCreator #NigerianTikTok #Blowva #LagosSkit` },
+      fashion: { caption: `Nigerian fashion is taking over and this ${desc} is the proof 👗✨\n\nComment YES if you want the full outfit details!`, hashtags: `#NigerianFashion #AfricanFashion #NaijaStyle #Ootd #FashionTok #AfroFusion #StyleInspo #NigerianCreator #FashionNigeria #Blowva #AfricanStyle` },
+      makeup: { caption: `This ${desc} tutorial is the one you have been waiting for 💄✨\n\nNigerian beauty secrets finally revealed. Save this now!`, hashtags: `#NigerianBeauty #AfricanBeauty #MakeupTutorial #BeautyTok #NaijaBeauty #AfricanMakeup #SkincareRoutine #Blowva #NigerianCreator #BeautyCreator #GlowUp` },
+      default: { caption: `This ${desc} is the content Nigerian creators needed to see 🚀\n\nSave this and share with a creator who needs to see it today.`, hashtags: `#NaijaCreator #NigerianTikTok #AfricanCreator #ContentCreator #GoViral #Nigeria #NigerianContent #CreatorLife #Blowva #AfricanContent #ViralContent` }
+    };
+    let pick = niches.default;
+    if (d.includes('food')||d.includes('cook')||d.includes('recipe')||d.includes('eat')||d.includes('jollof')) pick = niches.food;
+    else if (d.includes('comedy')||d.includes('skit')||d.includes('funny')||d.includes('joke')) pick = niches.comedy;
+    else if (d.includes('fashion')||d.includes('outfit')||d.includes('style')||d.includes('wear')) pick = niches.fashion;
+    else if (d.includes('makeup')||d.includes('beauty')||d.includes('skincare')||d.includes('hair')) pick = niches.makeup;
+
+    document.getElementById('caption-text').textContent = pick.caption;
+    document.getElementById('hashtag-text').textContent = pick.hashtags;
+    document.getElementById('ai-result').classList.add('show');
+    document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Generate →';
 }
 
 function copyCaption() {
@@ -563,6 +667,36 @@ function copyCaption() {
 document.getElementById('video-desc').addEventListener('keydown', e => {
   if (e.key === 'Enter') generateCaption();
 });
+
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function setTheme(mode) {
+  if (mode === 'dark') {
+    document.body.style.background = '#0D110D';
+    document.body.style.color = '#F0F5F0';
+    document.getElementById('btn-dark').classList.add('active');
+    document.getElementById('btn-light').classList.remove('active');
+    localStorage.setItem('blowva-theme', 'dark');
+  } else {
+    document.body.style.background = '';
+    document.body.style.color = '';
+    document.getElementById('btn-light').classList.add('active');
+    document.getElementById('btn-dark').classList.remove('active');
+    localStorage.setItem('blowva-theme', 'light');
+  }
+}
+(function(){
+  if(localStorage.getItem('blowva-theme')==='dark') setTheme('dark');
+})();
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeDrawer(); });
 </script>
 </body>
 </html>
