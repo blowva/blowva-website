@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blowva — Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap)" rel="stylesheet">
+<script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2)"></script>
 <style>
 :root {
   --green: #00B859;
@@ -64,8 +64,6 @@ body{
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
 }
-
-/* DARK MODE */
 body.dark{
   --black:#F0F5F0;
   --white:#121A13;
@@ -102,7 +100,6 @@ nav{
 }
 .logo-text{font-size:1.15rem;font-weight:800;color:var(--black);letter-spacing:-.5px;}
 .logo-text span{color:var(--green);}
-
 .nav-right{display:flex;align-items:center;gap:1rem;}
 .user-pill{
   display:flex;align-items:center;gap:8px;
@@ -158,10 +155,7 @@ nav{
 
 /* WELCOME */
 .welcome{margin-bottom:1.75rem;}
-.welcome h1{
-  font-size:1.4rem;font-weight:800;
-  color:var(--black);margin-bottom:3px;
-}
+.welcome h1{font-size:1.4rem;font-weight:800;color:var(--black);margin-bottom:3px;}
 .welcome p{font-size:0.88rem;color:var(--muted);}
 
 /* STATS */
@@ -169,9 +163,7 @@ nav{
   display:grid;grid-template-columns:repeat(2,1fr);
   gap:12px;margin-bottom:1.75rem;
 }
-@media(min-width:701px){
-  .stats-grid{grid-template-columns:repeat(4,1fr);}
-}
+@media(min-width:701px){.stats-grid{grid-template-columns:repeat(4,1fr);}}
 .stat-card{
   background:var(--white);border:1.5px solid var(--border);
   border-radius:14px;padding:1.1rem;
@@ -184,10 +176,7 @@ nav{
 .stat-change.grey{color:var(--muted2);}
 
 /* SECTION TITLE */
-.sec-title{
-  font-size:1rem;font-weight:800;
-  color:var(--black);margin-bottom:1rem;
-}
+.sec-title{font-size:1rem;font-weight:800;color:var(--black);margin-bottom:1rem;}
 
 /* QUICK ACTIONS */
 .quick-grid{
@@ -214,7 +203,7 @@ nav{
 .quick-title{font-size:0.88rem;font-weight:700;color:var(--black);}
 .quick-sub{font-size:0.76rem;color:var(--muted);line-height:1.5;}
 
-/* AI CAPTION BOX */
+/* AI BOX (shared by caption generator and upload section) */
 .ai-box{
   background:var(--white);border:1.5px solid var(--border);
   border-radius:16px;padding:1.5rem;
@@ -230,7 +219,6 @@ nav{
   padding:3px 8px;border-radius:999px;letter-spacing:0.5px;
 }
 .ai-box-title{font-size:0.95rem;font-weight:800;color:var(--black);}
-.ai-input-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
 .ai-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
 .ai-field{display:flex;flex-direction:column;gap:4px;}
 .ai-field-label{font-size:0.72rem;font-weight:700;color:var(--muted);letter-spacing:0.3px;}
@@ -245,12 +233,12 @@ nav{
   background:var(--white);
   transition:border-color 0.2s;
 }
-.ai-input{flex:1;min-width:200px;}
-.ai-select{appearance:none;-webkit-appearance:none;cursor:pointer;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2393AE99' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+.ai-select{
+  appearance:none;-webkit-appearance:none;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2393AE99' stroke-width='2' fill='none'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
 }
-.ai-input:focus{border-color:var(--green);}
+.ai-input:focus,.ai-select:focus{border-color:var(--green);}
 .ai-input::placeholder{color:var(--muted2);}
 .btn-generate{
   background:var(--green);color:#fff;border:none;
@@ -262,7 +250,17 @@ nav{
 }
 .btn-generate:hover{opacity:0.9;transform:translateY(-1px);}
 .btn-generate:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.btn-secondary{
+  background:transparent;color:var(--green);
+  border:1.5px solid var(--green);
+  padding:0.75rem 1.5rem;border-radius:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.88rem;font-weight:700;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.btn-secondary:hover{background:var(--green-light);}
 
+/* AI RESULT */
 .ai-result{
   background:var(--off);border:1px solid var(--border);
   border-radius:10px;padding:1rem;
@@ -278,10 +276,7 @@ nav{
   line-height:1.7;margin-bottom:10px;
   white-space:pre-wrap;
 }
-.ai-hashtags{
-  font-size:0.82rem;color:var(--green);
-  font-weight:600;line-height:1.8;
-}
+.ai-hashtags{font-size:0.82rem;color:var(--green);font-weight:600;line-height:1.8;}
 .copy-btn{
   background:var(--white);border:1px solid var(--border2);
   color:var(--muted);padding:5px 14px;border-radius:7px;
@@ -290,6 +285,127 @@ nav{
   margin-top:8px;transition:all 0.15s;
 }
 .copy-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* UPLOAD SECTION */
+.upload-drop-zone{
+  border:2px dashed var(--border2);
+  border-radius:14px;
+  padding:2.5rem 1rem;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color 0.2s,background 0.2s;
+  background:var(--off);
+  margin-bottom:1rem;
+  position:relative;
+}
+.upload-drop-zone:hover,.upload-drop-zone.dragover{
+  border-color:var(--green);
+  background:var(--green-light);
+}
+.upload-drop-zone input[type=file]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.upload-drop-icon{font-size:2.2rem;margin-bottom:10px;}
+.upload-drop-title{font-size:0.92rem;font-weight:700;color:var(--black);margin-bottom:4px;}
+.upload-drop-sub{font-size:0.76rem;color:var(--muted2);}
+.upload-drop-sub span{color:var(--green);font-weight:600;}
+
+.upload-file-preview{
+  display:none;align-items:center;gap:12px;
+  background:var(--green-light);
+  border:1.5px solid var(--green-border);
+  border-radius:10px;padding:0.85rem 1rem;
+  margin-bottom:1rem;
+}
+.upload-file-preview.show{display:flex;}
+.upload-file-icon{font-size:1.5rem;flex-shrink:0;}
+.upload-file-name{
+  font-size:0.82rem;font-weight:600;color:var(--black);flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.upload-file-size{font-size:0.72rem;color:var(--muted2);flex-shrink:0;}
+.upload-file-remove{
+  background:none;border:none;cursor:pointer;
+  color:var(--muted2);font-size:1rem;padding:2px;
+  transition:color 0.15s;flex-shrink:0;
+}
+.upload-file-remove:hover{color:#EF4444;}
+
+.upload-progress-wrap{display:none;margin-bottom:1rem;}
+.upload-progress-wrap.show{display:block;}
+.upload-progress-label{
+  display:flex;justify-content:space-between;
+  font-size:0.75rem;font-weight:600;color:var(--muted);
+  margin-bottom:6px;
+}
+.upload-progress-bar{height:6px;background:var(--border);border-radius:999px;overflow:hidden;}
+.upload-progress-fill{
+  height:100%;background:var(--green);border-radius:999px;
+  width:0%;transition:width 0.3s ease;
+}
+
+.upload-status-msg{
+  font-size:0.82rem;color:var(--muted);
+  margin-bottom:1rem;min-height:20px;
+  display:flex;align-items:center;gap:6px;
+}
+
+.caption-review-box{
+  display:none;
+  background:var(--off);border:1.5px solid var(--green-border);
+  border-radius:14px;padding:1.25rem;
+  margin-top:1rem;
+}
+.caption-review-box.show{display:block;}
+.caption-review-title{
+  font-size:0.82rem;font-weight:700;color:var(--black);
+  margin-bottom:10px;
+}
+.caption-textarea{
+  width:100%;min-height:130px;resize:vertical;
+  padding:0.85rem 1rem;
+  border:1.5px solid var(--border2);
+  border-radius:10px;font-size:0.88rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--black);background:var(--white);
+  outline:none;line-height:1.7;
+  transition:border-color 0.2s;
+}
+.caption-textarea:focus{border-color:var(--green);}
+.caption-actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+
+/* POSTS LIST */
+.posts-list{margin-bottom:1.75rem;}
+.post-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:14px;padding:1rem 1.25rem;
+  margin-bottom:10px;
+  display:flex;align-items:center;gap:14px;
+}
+.post-card-icon{
+  width:42px;height:42px;border-radius:10px;
+  background:var(--green-light);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.post-card-info{flex:1;min-width:0;}
+.post-card-platform{
+  font-size:0.72rem;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;
+}
+.post-card-caption{
+  font-size:0.82rem;color:var(--black);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-weight:500;
+}
+.post-card-date{font-size:0.7rem;color:var(--muted2);margin-top:2px;}
+.post-card-status{
+  font-size:0.72rem;font-weight:700;
+  padding:4px 10px;border-radius:999px;flex-shrink:0;
+}
+.status-scheduled{background:#FEF3C7;color:#D97706;}
+.status-posted{background:var(--green-light);color:var(--green);}
+.status-failed{background:#FEE2E2;color:#EF4444;}
 
 /* CONNECT PLATFORMS */
 .platforms-grid{
@@ -342,36 +458,77 @@ nav{
 .loading-text{font-size:0.85rem;color:var(--muted);font-weight:500;}
 
 /* DRAWER */
-.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.45);
+  z-index:300;opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
 .drawer-overlay.open{opacity:1;pointer-events:all;}
-.drawer{position:fixed;top:0;left:-300px;width:280px;height:100vh;background:var(--white);z-index:400;transition:left 0.3s ease;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;}
+.drawer{
+  position:fixed;top:0;left:-300px;width:280px;height:100vh;
+  background:var(--white);z-index:400;transition:left 0.3s ease;
+  display:flex;flex-direction:column;
+  box-shadow:4px 0 24px rgba(0,0,0,0.12);overflow-y:auto;
+}
 .drawer.open{left:0;}
-.drawer-header{display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:2;}
+.drawer-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);
+  background:var(--white);position:sticky;top:0;z-index:2;
+}
 .drawer-logo{display:flex;align-items:center;gap:8px;}
 .drawer-logo-icon{width:30px;height:30px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;}
 .drawer-logo-arrow{width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:9px solid #fff;margin-left:2px;}
 .drawer-logo-text{font-size:1.1rem;font-weight:800;color:var(--black);}
 .drawer-logo-text span{color:var(--green);}
-.drawer-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-size:1.1rem;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.drawer-close{
+  width:32px;height:32px;border-radius:8px;border:1px solid var(--border);
+  background:none;cursor:pointer;font-size:1.1rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;transition:background 0.15s;
+}
 .drawer-close:hover{background:var(--off);}
-.theme-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--off);}
+.theme-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.25rem;border-bottom:1px solid var(--border);background:var(--off);
+}
 .theme-label{font-size:.82rem;font-weight:600;color:var(--muted);}
 .theme-btns{display:flex;gap:6px;}
-.theme-btn{padding:4px 12px;border-radius:7px;font-size:.75rem;font-weight:700;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;}
+.theme-btn{
+  padding:4px 12px;border-radius:7px;font-size:.75rem;font-weight:700;
+  border:1px solid var(--border);background:var(--white);color:var(--muted);
+  cursor:pointer;transition:all 0.15s;font-family:'Plus Jakarta Sans',sans-serif;
+}
 .theme-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
 .drawer-section{padding:.6rem 0;}
-.drawer-section-title{font-size:.65rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;padding:.4rem 1.25rem .3rem;}
-.drawer-item{display:flex;align-items:center;gap:12px;padding:.75rem 1.25rem;font-size:.9rem;font-weight:500;color:var(--black);text-decoration:none;transition:background 0.15s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;}
+.drawer-section-title{
+  font-size:.65rem;font-weight:700;color:var(--muted2);
+  text-transform:uppercase;letter-spacing:1.5px;padding:.4rem 1.25rem .3rem;
+}
+.drawer-item{
+  display:flex;align-items:center;gap:12px;padding:.75rem 1.25rem;
+  font-size:.9rem;font-weight:500;color:var(--black);text-decoration:none;
+  transition:background 0.15s;cursor:pointer;border:none;background:none;
+  width:100%;text-align:left;font-family:'Plus Jakarta Sans',sans-serif;
+}
 .drawer-item:hover{background:var(--green-light);}
 .drawer-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center;}
 .drawer-item-text{flex:1;}
-.drawer-item-badge{font-size:.65rem;font-weight:700;background:var(--green);color:#fff;padding:2px 7px;border-radius:999px;}
+.drawer-item-badge{
+  font-size:.65rem;font-weight:700;background:var(--green);
+  color:#fff;padding:2px 7px;border-radius:999px;
+}
 .drawer-item-badge.warn{background:#F59E0B;}
 .drawer-divider{height:1px;background:var(--border);margin:.4rem 0;}
-.drawer-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid var(--border);background:var(--off);}
+.drawer-footer{
+  margin-top:auto;padding:1rem 1.25rem;
+  border-top:1px solid var(--border);background:var(--off);
+}
 .drawer-footer-text{font-size:.72rem;color:var(--muted2);text-align:center;line-height:1.6;}
 .drawer-footer-text a{color:var(--green);text-decoration:none;font-weight:500;}
-.hamburger-dash{display:flex;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background 0.15s;}
+.hamburger-dash{
+  display:flex;flex-direction:column;justify-content:center;gap:5px;
+  background:none;border:none;cursor:pointer;padding:4px;
+  border-radius:6px;transition:background 0.15s;
+}
 .hamburger-dash:hover{background:var(--off);}
 .hamburger-dash span{display:block;width:20px;height:2px;background:var(--black);border-radius:2px;}
 
@@ -380,12 +537,19 @@ nav{
   .sidebar{display:none;}
   .main{padding:1.25rem;}
   .quick-grid{grid-template-columns:1fr 1fr;}
+  .ai-fields{grid-template-columns:1fr;}
+  .caption-actions{flex-direction:column;}
+  .caption-actions .btn-generate,
+  .caption-actions .btn-secondary{width:100%;}
 }
 </style>
 </head>
 <body>
 
+<!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER -->
 <div class="drawer" id="drawer">
   <div class="drawer-header">
     <div class="drawer-logo">
@@ -406,10 +570,10 @@ nav{
   <div class="drawer-section">
     <div class="drawer-section-title">Dashboard</div>
     <a class="drawer-item" href="dashboard.html"><span class="drawer-icon">&#128202;</span><span class="drawer-item-text">Overview</span></a>
-    <div class="drawer-item"><span class="drawer-icon">&#127908;</span><span class="drawer-item-text">Upload video</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">&#9997;&#65039;</span><span class="drawer-item-text">AI captions</span></div>
-    <div class="drawer-item"><span class="drawer-icon">&#128161;</span><span class="drawer-item-text">Content suggestions</span></div>
-    <div class="drawer-item"><span class="drawer-icon">&#128200;</span><span class="drawer-item-text">Analytics</span></div>
+    <div class="drawer-item" onclick="scrollToUpload()"><span class="drawer-icon">&#127908;</span><span class="drawer-item-text">Upload video</span></div>
+    <div class="drawer-item" onclick="scrollToCaption()"><span class="drawer-icon">&#9997;&#65039;</span><span class="drawer-item-text">AI captions</span></div>
+    <div class="drawer-item" onclick="alert('Content suggestions coming soon!')"><span class="drawer-icon">&#128161;</span><span class="drawer-item-text">Content suggestions</span></div>
+    <div class="drawer-item" onclick="alert('Analytics coming soon!')"><span class="drawer-icon">&#128200;</span><span class="drawer-item-text">Analytics</span></div>
   </div>
 
   <div class="drawer-divider"></div>
@@ -426,9 +590,9 @@ nav{
 
   <div class="drawer-section">
     <div class="drawer-section-title">Connect Platforms</div>
-    <div class="drawer-item"><span class="drawer-icon">&#127925;</span><span class="drawer-item-text">Connect TikTok</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">&#128248;</span><span class="drawer-item-text">Connect Instagram</span><span class="drawer-item-badge warn">Soon</span></div>
-    <div class="drawer-item"><span class="drawer-icon">&#128100;</span><span class="drawer-item-text">Connect Facebook</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item" onclick="alert('TikTok API coming soon!')"><span class="drawer-icon">&#127925;</span><span class="drawer-item-text">Connect TikTok</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item" onclick="alert('Instagram API coming soon!')"><span class="drawer-icon">&#128248;</span><span class="drawer-item-text">Connect Instagram</span><span class="drawer-item-badge warn">Soon</span></div>
+    <div class="drawer-item" onclick="alert('Facebook API coming soon!')"><span class="drawer-icon">&#128100;</span><span class="drawer-item-text">Connect Facebook</span><span class="drawer-item-badge warn">Soon</span></div>
   </div>
 
   <div class="drawer-divider"></div>
@@ -447,7 +611,7 @@ nav{
   </div>
 </div>
 
-<!-- LOADING -->
+<!-- LOADING SCREEN -->
 <div class="loading" id="loading">
   <div class="loading-icon"><div class="arr"></div></div>
   <div class="loading-text">Loading your dashboard...</div>
@@ -476,27 +640,13 @@ nav{
 <div class="layout">
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <a class="nav-item active" href="dashboard.html">
-      <span class="icon">&#128202;</span> Dashboard
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#9889;</span> Post video
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#9997;&#65039;</span> AI captions
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#128161;</span> Suggestions
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#128200;</span> Analytics
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#128279;</span> Accounts
-    </a>
-    <a class="nav-item" href="#">
-      <span class="icon">&#9881;&#65039;</span> Settings
-    </a>
+    <a class="nav-item active" href="dashboard.html"><span class="icon">&#128202;</span> Dashboard</a>
+    <a class="nav-item" href="#" onclick="scrollToUpload()"><span class="icon">&#9889;</span> Post video</a>
+    <a class="nav-item" href="#" onclick="scrollToCaption()"><span class="icon">&#9997;&#65039;</span> AI captions</a>
+    <a class="nav-item" href="#"><span class="icon">&#128161;</span> Suggestions</a>
+    <a class="nav-item" href="#"><span class="icon">&#128200;</span> Analytics</a>
+    <a class="nav-item" href="#"><span class="icon">&#128279;</span> Accounts</a>
+    <a class="nav-item" href="#"><span class="icon">&#9881;&#65039;</span> Settings</a>
     <div class="sidebar-bottom">
       <div class="sidebar-badge">
         <div class="sb-title">&#128640; Free plan</div>
@@ -505,7 +655,7 @@ nav{
     </div>
   </aside>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <main class="main">
 
     <!-- WELCOME -->
@@ -528,8 +678,8 @@ nav{
       </div>
       <div class="stat-card">
         <div class="stat-label">Posts published</div>
-        <div class="stat-val">0</div>
-        <div class="stat-change grey">No posts yet</div>
+        <div class="stat-val" id="stat-posts">0</div>
+        <div class="stat-change grey" id="stat-posts-label">No posts yet</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Viral score</div>
@@ -541,12 +691,12 @@ nav{
     <!-- QUICK ACTIONS -->
     <div class="sec-title">Quick actions</div>
     <div class="quick-grid">
-      <div class="quick-card" onclick="alert('Video upload coming soon! We are building this next.')">
+      <div class="quick-card" onclick="scrollToUpload()">
         <div class="quick-icon">&#127908;</div>
         <div class="quick-title">Upload a video</div>
         <div class="quick-sub">Post to TikTok, Instagram &amp; Facebook automatically</div>
       </div>
-      <div class="quick-card" onclick="document.getElementById('ai-section').scrollIntoView({behavior:'smooth'})">
+      <div class="quick-card" onclick="scrollToCaption()">
         <div class="quick-icon">&#9997;&#65039;</div>
         <div class="quick-title">Generate AI caption</div>
         <div class="quick-sub">Get a scroll-stopping caption and hashtags instantly</div>
@@ -563,7 +713,87 @@ nav{
       </div>
     </div>
 
-    <!-- AI CAPTION GENERATOR -->
+    <!-- ===================== VIDEO UPLOAD SECTION ===================== -->
+    <div class="sec-title">Upload &amp; schedule a video</div>
+    <div class="ai-box" id="upload-section">
+      <div class="ai-box-header">
+        <div class="ai-badge">NEW</div>
+        <div class="ai-box-title">Upload your video</div>
+      </div>
+
+      <!-- Platform + Niche -->
+      <div class="ai-fields" style="margin-bottom:1rem;">
+        <div class="ai-field">
+          <div class="ai-field-label">Platform<span class="req">*</span></div>
+          <select class="ai-select" id="upload-platform">
+            <option value="" disabled selected>Select platform</option>
+            <option value="tiktok">TikTok</option>
+            <option value="instagram">Instagram</option>
+            <option value="facebook">Facebook</option>
+          </select>
+        </div>
+        <div class="ai-field">
+          <div class="ai-field-label">Your niche<span class="req">*</span></div>
+          <input class="ai-input" id="upload-niche" placeholder="e.g. Comedy, Fashion, Music">
+        </div>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div class="upload-drop-zone" id="drop-zone">
+        <input type="file" id="video-file" accept="video/mp4,video/quicktime,video/x-m4v" onchange="handleFileSelect(this.files[0])">
+        <div class="upload-drop-icon">&#127916;</div>
+        <div class="upload-drop-title">Drag &amp; drop your video here</div>
+        <div class="upload-drop-sub">or <span>browse to choose file</span> &mdash; MP4 only, max <span>500MB</span></div>
+      </div>
+
+      <!-- File Preview -->
+      <div class="upload-file-preview" id="file-preview">
+        <div class="upload-file-icon">&#127916;</div>
+        <div class="upload-file-name" id="file-name-display"></div>
+        <div class="upload-file-size" id="file-size-display"></div>
+        <button class="upload-file-remove" onclick="removeFile()" title="Remove">&#10005;</button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="upload-progress-wrap" id="progress-wrap">
+        <div class="upload-progress-label">
+          <span id="progress-label-text">Uploading...</span>
+          <span id="progress-pct">0%</span>
+        </div>
+        <div class="upload-progress-bar">
+          <div class="upload-progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <!-- Status Message -->
+      <div class="upload-status-msg" id="upload-status"></div>
+
+      <!-- Upload Button -->
+      <button class="btn-generate" id="upload-btn" onclick="startUpload()" style="width:100%;">
+        Upload &amp; generate caption &#8594;
+      </button>
+
+      <!-- Caption Review Box -->
+      <div class="caption-review-box" id="caption-review">
+        <div class="caption-review-title">&#9997;&#65039; Review &amp; edit your AI caption before scheduling</div>
+        <textarea class="caption-textarea" id="upload-caption" placeholder="Your AI caption will appear here..."></textarea>
+        <div class="caption-actions">
+          <button class="btn-generate" onclick="approveAndSchedule()">&#128197; Approve &amp; schedule post</button>
+          <button class="btn-secondary" onclick="regenerateCaption()">&#9889; Regenerate caption</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULED POSTS -->
+    <div class="sec-title">Your scheduled posts</div>
+    <div class="posts-list" id="posts-list">
+      <div style="font-size:0.82rem;color:var(--muted2);padding:0.5rem 0;">
+        No posts yet. Upload your first video above.
+      </div>
+    </div>
+
+    <!-- ===================== AI CAPTION GENERATOR ===================== -->
+    <div class="sec-title">Generate a standalone caption</div>
     <div class="ai-box" id="ai-section">
       <div class="ai-box-header">
         <div class="ai-badge">AI</div>
@@ -614,7 +844,9 @@ nav{
         </div>
       </div>
 
-      <button class="btn-generate" id="gen-btn" onclick="generateCaption()" style="width:100%;">Generate &rarr;</button>
+      <button class="btn-generate" id="gen-btn" onclick="generateCaption()" style="width:100%;margin-top:4px;">
+        Generate &#8594;
+      </button>
 
       <div class="ai-result" id="ai-result" style="margin-top:12px;">
         <div class="ai-result-label">Your AI caption</div>
@@ -624,48 +856,6 @@ nav{
         <button class="copy-btn" onclick="copyCaption()">Copy caption + hashtags</button>
       </div>
     </div>
-
-    <!-- VIDEO UPLOAD SECTION -->
-<div class="ai-box" id="upload-section">
-  <div class="ai-box-header">
-    <div class="ai-badge">UPLOAD</div>
-    <div class="ai-box-title">Upload your video</div>
-  </div>
-
-  <form id="upload-form" onsubmit="return handleVideoUpload(event)">
-    <div class="ai-field">
-      <div class="ai-field-label">Select platform<span class="req">*</span></div>
-      <select class="ai-select" id="upload-platform" required>
-        <option value="" disabled selected>Select platform</option>
-        <option value="tiktok">TikTok</option>
-        <option value="instagram">Instagram</option>
-        <option value="facebook">Facebook</option>
-      </select>
-    </div>
-
-    <div class="ai-field" style="margin-top:10px;">
-      <div class="ai-field-label">Select niche<span class="req">*</span></div>
-      <input class="ai-input" type="text" id="upload-niche" placeholder="e.g. Comedy, Fashion, Music" required>
-    </div>
-
-    <div class="ai-field" style="margin-top:10px;">
-      <div class="ai-field-label">Upload video file<span class="req">*</span></div>
-      <input type="file" id="video-file" accept="video/mp4,video/quicktime,video/x-m4v" style="display:block;padding:1rem 0;" required>
-      <small style="font-size:0.75rem;color:var(--muted2)">Max file size: 500MB</small>
-    </div>
-
-    <button class="btn-generate" style="width:100%;margin-top:20px;">Upload video &rarr;</button>
-  </form>
-
-  <!-- Progress + Caption Review -->
-  <div id="upload-status" style="display:none;margin-top:10px;font-size:0.85rem;color:var(--muted);"></div>
-
-  <div class="ai-result" id="upload-caption-box" style="margin-top:15px;">
-    <div class="ai-result-label">Suggested caption (AI)</div>
-    <textarea id="upload-caption" class="ai-input" style="width:100%;height:100px;resize:vertical;"></textarea>
-    <button class="btn-generate" style="margin-top:10px;" onclick="approveAndSchedule()">Approve & Schedule</button>
-  </div>
-</div>
 
     <!-- CONNECT PLATFORMS -->
     <div class="sec-title" id="platforms-section">Connect your social accounts</div>
@@ -701,11 +891,9 @@ nav{
 
 <script>
 /* =============================================
-   SUPABASE AUTH — FIXED VERSION
-   Uses onAuthStateChange instead of getUser()
-   to properly wait for session restoration
+   SUPABASE CONFIG
    ============================================= */
-const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
+const SUPABASE_URL = '[btfgjsivlwpmshgaqnub.supabase.co](https://btfgjsivlwpmshgaqnub.supabase.co)';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
 
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -717,6 +905,50 @@ const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   }
 });
 
+/* =============================================
+   AUTH — SESSION RESTORE
+   ============================================= */
+var authHandled = false;
+
+sbClient.auth.onAuthStateChange(function(event, session) {
+  if (authHandled) return;
+  if (event === 'INITIAL_SESSION') {
+    authHandled = true;
+    if (session && session.user) {
+      showDashboard(getUserDisplayName(session.user));
+      loadPosts(session.user.id);
+    } else {
+      window.location.replace('login.html');
+    }
+    return;
+  }
+  if (event === 'SIGNED_IN') {
+    authHandled = true;
+    showDashboard(getUserDisplayName(session.user));
+    loadPosts(session.user.id);
+    return;
+  }
+  if (event === 'TOKEN_REFRESHED' && session && session.user) {
+    authHandled = true;
+    showDashboard(getUserDisplayName(session.user));
+    loadPosts(session.user.id);
+    return;
+  }
+});
+
+setTimeout(function() {
+  if (!authHandled) {
+    authHandled = true;
+    window.location.replace('login.html');
+  }
+}, 8000);
+
+function getUserDisplayName(user) {
+  if (user.user_metadata && user.user_metadata.full_name) return user.user_metadata.full_name;
+  if (user.email) return user.email.split('@')[0];
+  return 'Creator';
+}
+
 function showDashboard(name) {
   var parts = (name || 'Creator').split(' ');
   var initials = parts.map(function(n){ return n[0] || ''; }).join('').toUpperCase().slice(0,2) || 'BV';
@@ -726,65 +958,334 @@ function showDashboard(name) {
   document.getElementById('loading').style.display = 'none';
 }
 
-function getUserDisplayName(user) {
-  if (user.user_metadata && user.user_metadata.full_name) {
-    return user.user_metadata.full_name;
-  }
-  if (user.email) {
-    return user.email.split('@')[0];
-  }
-  return 'Creator';
-}
-
-/* --- THE FIX: Use onAuthStateChange to wait for session restoration --- */
-var authHandled = false;
-
-sbClient.auth.onAuthStateChange(function(event, session) {
-  if (authHandled) return;
-
-  // INITIAL_SESSION fires after Supabase restores session from localStorage
-  if (event === 'INITIAL_SESSION') {
-    authHandled = true;
-    if (session && session.user) {
-      showDashboard(getUserDisplayName(session.user));
-    } else {
-      window.location.replace('login.html');
-    }
-    return;
-  }
-
-  // SIGNED_IN fires if user just logged in (e.g. redirect from login page)
-  if (event === 'SIGNED_IN') {
-    authHandled = true;
-    showDashboard(getUserDisplayName(session.user));
-    return;
-  }
-
-  // TOKEN_REFRESHED means session is alive
-  if (event === 'TOKEN_REFRESHED' && session && session.user) {
-    authHandled = true;
-    showDashboard(getUserDisplayName(session.user));
-    return;
-  }
-});
-
-// Failsafe — if onAuthStateChange never fires within 8 seconds
-setTimeout(function() {
-  if (!authHandled) {
-    authHandled = true;
-    window.location.replace('login.html');
-  }
-}, 8000);
-
-/* --- LOGOUT --- */
 async function logout() {
   await sbClient.auth.signOut();
   window.location.href = 'login.html';
 }
 
 /* =============================================
-   AI CAPTION GENERATOR
-   Calls /api/generate-caption with smart fallback
+   SCROLL HELPERS
+   ============================================= */
+function scrollToUpload() {
+  closeDrawer();
+  document.getElementById('upload-section').scrollIntoView({ behavior: 'smooth' });
+}
+function scrollToCaption() {
+  closeDrawer();
+  document.getElementById('ai-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* =============================================
+   LOAD SCHEDULED POSTS
+   ============================================= */
+async function loadPosts(userId) {
+  try {
+    var { data, error } = await sbClient
+      .from('posts')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+
+    var list = document.getElementById('posts-list');
+
+    if (!data || data.length === 0) {
+      list.innerHTML = '<div style="font-size:0.82rem;color:var(--muted2);padding:0.5rem 0;">No posts yet. Upload your first video above.</div>';
+      return;
+    }
+
+    // Update stat
+    var posted = data.filter(function(p){ return p.status === 'posted'; }).length;
+    document.getElementById('stat-posts').textContent = posted;
+    if (posted > 0) document.getElementById('stat-posts-label').textContent = posted + ' video' + (posted > 1 ? 's' : '') + ' published';
+
+    var platformIcons = { tiktok: '&#127925;', instagram: '&#128248;', facebook: '&#128100;' };
+
+    list.innerHTML = data.map(function(post) {
+      var icon = platformIcons[post.platform] || '&#127916;';
+      var statusClass = 'status-' + (post.status === 'posted' ? 'posted' : post.status === 'failed' ? 'failed' : 'scheduled');
+      var statusLabel = post.status === 'posted' ? 'Posted' : post.status === 'failed' ? 'Failed' : 'Scheduled';
+      var date = new Date(post.created_at).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' });
+      var caption = (post.caption || 'No caption').slice(0, 80) + ((post.caption || '').length > 80 ? '...' : '');
+      var postLink = post.post_url ? '<a href="' + post.post_url + '" target="_blank" style="color:var(--green);font-size:0.72rem;font-weight:600;text-decoration:none;margin-left:8px;">View post &#8599;</a>' : '';
+      return '<div class="post-card">' +
+        '<div class="post-card-icon">' + icon + '</div>' +
+        '<div class="post-card-info">' +
+          '<div class="post-card-platform">' + post.platform + postLink + '</div>' +
+          '<div class="post-card-caption">' + caption + '</div>' +
+          '<div class="post-card-date">' + date + '</div>' +
+        '</div>' +
+        '<div class="post-card-status ' + statusClass + '">' + statusLabel + '</div>' +
+      '</div>';
+    }).join('');
+
+  } catch (err) {
+    console.error('Error loading posts:', err);
+  }
+}
+
+/* =============================================
+   VIDEO UPLOAD — FILE HANDLING
+   ============================================= */
+var selectedFile = null;
+var currentUploadData = null;
+
+var dropZone = document.getElementById('drop-zone');
+
+dropZone.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', function() {
+  dropZone.classList.remove('dragover');
+});
+dropZone.addEventListener('drop', function(e) {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  var file = e.dataTransfer.files[0];
+  if (file) handleFileSelect(file);
+});
+
+function handleFileSelect(file) {
+  if (!file) return;
+
+  var allowed = ['video/mp4', 'video/quicktime', 'video/x-m4v'];
+  if (!allowed.includes(file.type)) {
+    setUploadStatus('&#10060; Only MP4 video files are allowed.', 'error');
+    return;
+  }
+  if (file.size > 524288000) {
+    setUploadStatus('&#10060; File is too large. Maximum size is 500MB.', 'error');
+    return;
+  }
+
+  selectedFile = file;
+  document.getElementById('file-name-display').textContent = file.name;
+  document.getElementById('file-size-display').textContent = formatFileSize(file.size);
+  document.getElementById('file-preview').classList.add('show');
+  document.getElementById('drop-zone').style.display = 'none';
+  setUploadStatus('');
+  document.getElementById('caption-review').classList.remove('show');
+}
+
+function removeFile() {
+  selectedFile = null;
+  currentUploadData = null;
+  document.getElementById('video-file').value = '';
+  document.getElementById('file-preview').classList.remove('show');
+  document.getElementById('drop-zone').style.display = 'block';
+  document.getElementById('progress-wrap').classList.remove('show');
+  document.getElementById('caption-review').classList.remove('show');
+  setUploadStatus('');
+  resetUploadBtn();
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function setUploadStatus(msg, type) {
+  var el = document.getElementById('upload-status');
+  el.innerHTML = msg;
+  el.style.color = type === 'error' ? '#EF4444' : type === 'success' ? 'var(--green)' : 'var(--muted)';
+}
+
+function resetUploadBtn() {
+  var btn = document.getElementById('upload-btn');
+  btn.disabled = false;
+  btn.textContent = 'Upload & generate caption →';
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progress-wrap').classList.add('show');
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label-text').textContent = label || 'Uploading...';
+}
+
+/* =============================================
+   VIDEO UPLOAD — MAIN UPLOAD FUNCTION
+   ============================================= */
+async function startUpload() {
+  var platform = document.getElementById('upload-platform').value;
+  var niche = document.getElementById('upload-niche').value.trim();
+
+  if (!platform) {
+    setUploadStatus('&#10060; Please select a platform.', 'error');
+    return;
+  }
+  if (!niche) {
+    setUploadStatus('&#10060; Please enter your niche.', 'error');
+    document.getElementById('upload-niche').focus();
+    return;
+  }
+  if (!selectedFile) {
+    setUploadStatus('&#10060; Please select a video file first.', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('upload-btn');
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+
+  try {
+    var { data: userData } = await sbClient.auth.getUser();
+    if (!userData || !userData.user) throw new Error('Not logged in');
+    var userId = userData.user.id;
+
+    // Step 1 — Upload to Supabase Storage
+    setProgress(10, 'Uploading video...');
+    setUploadStatus('&#9650; Uploading your video to Blowva cloud...');
+
+    var timestamp = Date.now();
+    var cleanName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    var filePath = userId + '/' + timestamp + '_' + cleanName;
+
+    var { data: uploadData, error: uploadError } = await sbClient.storage
+      .from('videos')
+      .upload(filePath, selectedFile, { upsert: false });
+
+    if (uploadError) throw uploadError;
+
+    setProgress(60, 'Video uploaded. Generating caption...');
+    setUploadStatus('&#9889; Generating your AI caption...');
+
+    // Step 2 — Get signed URL (private bucket)
+    var { data: signedData } = await sbClient.storage
+      .from('videos')
+      .createSignedUrl(filePath, 60 * 60 * 24 * 2); // 48hr signed URL
+
+    var videoUrl = signedData ? signedData.signedUrl : '';
+
+    // Step 3 — Generate caption
+    var captionResult = await callCaptionAPI(niche, platform);
+
+    setProgress(90, 'Caption ready. Saving...');
+
+    // Step 4 — Save post to Supabase
+    var expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    var { data: postData, error: postError } = await sbClient.from('posts').insert({
+      user_id: userId,
+      video_url: videoUrl,
+      video_path: filePath,
+      platform: platform,
+      niche: niche,
+      caption: captionResult.caption,
+      hashtags: captionResult.hashtags,
+      status: 'scheduled',
+      scheduled_at: new Date().toISOString(),
+      expires_at: expiresAt
+    }).select().single();
+
+    if (postError) throw postError;
+
+    setProgress(100, 'Done!');
+    setUploadStatus('&#10003; Video uploaded and scheduled successfully!', 'success');
+
+    // Step 5 — Show caption for review
+    document.getElementById('upload-caption').value = captionResult.caption + '\n\n' + captionResult.hashtags;
+    document.getElementById('caption-review').classList.add('show');
+    document.getElementById('caption-review').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    currentUploadData = {
+      postId: postData.id,
+      filePath: filePath,
+      platform: platform,
+      niche: niche,
+      hashtags: captionResult.hashtags
+    };
+
+    btn.textContent = '&#10003; Uploaded!';
+    loadPosts(userId);
+
+  } catch (err) {
+    console.error('Upload error:', err);
+    setUploadStatus('&#10060; Upload failed: ' + err.message, 'error');
+    setProgress(0, '');
+    document.getElementById('progress-wrap').classList.remove('show');
+    resetUploadBtn();
+  }
+}
+
+/* =============================================
+   CAPTION API CALL WITH FALLBACK
+   ============================================= */
+async function callCaptionAPI(niche, platform) {
+  try {
+    var response = await fetch('/api/generate-caption', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        description: 'Short-form video for ' + niche + ' creators',
+        niche: niche,
+        platform: platform,
+        location: 'Nigeria',
+        videoType: 'Short video'
+      })
+    });
+    if (!response.ok) throw new Error('API error');
+    return await response.json();
+  } catch (err) {
+    // Fallback caption
+    var platformTag = platform.replace(/\s+/g,'').replace(/[()]/g,'');
+    return {
+      caption: 'This ' + niche + ' content just hit different \uD83D\uDD25\n\nNigerian creators are taking over ' + platform + ' and we are not stopping. Save this and thank me later!',
+      hashtags: '#' + niche.replace(/\s+/g,'') + ' #NigerianCreator #' + platformTag + ' #Blowva #GoViral #NaijaContent #AfricanCreator #ContentCreator'
+    };
+  }
+}
+
+/* =============================================
+   APPROVE & SCHEDULE / REGENERATE
+   ============================================= */
+async function approveAndSchedule() {
+  if (!currentUploadData) return;
+
+  var finalCaption = document.getElementById('upload-caption').value.trim();
+  if (!finalCaption) {
+    alert('Caption cannot be empty.');
+    return;
+  }
+
+  try {
+    // Split caption and hashtags
+    var parts = finalCaption.split('\n\n');
+    var caption = parts[0] || finalCaption;
+    var hashtags = parts.slice(1).join('\n\n') || currentUploadData.hashtags || '';
+
+    await sbClient.from('posts').update({
+      caption: caption,
+      hashtags: hashtags,
+      status: 'scheduled'
+    }).eq('id', currentUploadData.postId);
+
+    document.getElementById('caption-review').classList.remove('show');
+    setUploadStatus('&#128197; Post scheduled! It will go live once platform APIs are connected.', 'success');
+
+    var { data: userData } = await sbClient.auth.getUser();
+    if (userData && userData.user) loadPosts(userData.user.id);
+
+  } catch (err) {
+    console.error(err);
+    alert('Could not save caption: ' + err.message);
+  }
+}
+
+async function regenerateCaption() {
+  if (!currentUploadData) return;
+  setUploadStatus('&#9889; Regenerating caption...');
+  var result = await callCaptionAPI(currentUploadData.niche, currentUploadData.platform);
+  document.getElementById('upload-caption').value = result.caption + '\n\n' + result.hashtags;
+  currentUploadData.hashtags = result.hashtags;
+  setUploadStatus('&#10003; Caption regenerated. Edit and approve when ready.', 'success');
+}
+
+/* =============================================
+   AI CAPTION GENERATOR (standalone)
    ============================================= */
 async function generateCaption() {
   var desc = document.getElementById('video-desc').value.trim();
@@ -793,7 +1294,6 @@ async function generateCaption() {
   var videoType = document.getElementById('ai-video-type').value;
   var platform = document.getElementById('ai-platform').value;
 
-  // Validate all required fields
   var hasError = false;
   function markError(id) {
     var el = document.getElementById(id);
@@ -813,24 +1313,13 @@ async function generateCaption() {
   btn.textContent = '\u26A1 AI is writing...';
   document.getElementById('ai-result').classList.remove('show');
 
-  // Build rich prompt with all context
-  var fullPrompt = desc + ' | Location: ' + location + ' | Niche: ' + niche + ' | Video type: ' + videoType + ' | Platform: ' + platform;
-
   try {
     var response = await fetch('/api/generate-caption', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        description: desc,
-        location: location,
-        niche: niche,
-        videoType: videoType,
-        platform: platform
-      })
+      body: JSON.stringify({ description: desc, location: location, niche: niche, videoType: videoType, platform: platform })
     });
-
     if (!response.ok) throw new Error('Server error');
-
     var result = await response.json();
     document.getElementById('caption-text').textContent = result.caption;
     document.getElementById('hashtag-text').textContent = result.hashtags;
@@ -838,9 +1327,6 @@ async function generateCaption() {
     document.getElementById('ai-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   } catch (err) {
-    console.error('API Error:', err);
-
-    // Smart fallback using all fields
     var platformTag = platform.replace(/\s+/g,'').replace(/[()]/g,'');
     var locationCity = location.split(',')[0].trim();
     var caption = '';
@@ -849,17 +1335,17 @@ async function generateCaption() {
     if (videoType === 'POV') {
       caption = 'POV: You are in ' + locationCity + ' and you see this ' + desc + ' \uD83D\uDE02\uD83D\uDD25\n\nOnly ' + niche + ' creators from ' + locationCity + ' will understand this one. Save it!';
     } else if (videoType === 'Product review') {
-      caption = 'HONEST REVIEW: ' + desc + ' \uD83D\uDCF1\u2728\n\nAs a ' + niche + ' creator based in ' + locationCity + ', I had to test this for you. Watch till the end for my final verdict!';
+      caption = 'HONEST REVIEW: ' + desc + ' \uD83D\uDCF1\u2728\n\nAs a ' + niche + ' creator based in ' + locationCity + ', I had to test this for you. Watch till the end!';
     } else if (videoType === 'Teaching video' || videoType === 'Explanatory') {
-      caption = 'I wish someone taught me this earlier \uD83D\uDCA1\n\n' + desc + ' explained in a way that actually makes sense. ' + niche + ' creators in ' + locationCity + ', you need this!';
+      caption = 'I wish someone taught me this earlier \uD83D\uDCA1\n\n' + desc + ' explained simply. ' + niche + ' creators in ' + locationCity + ', you need this!';
     } else if (videoType === 'Car advert') {
-      caption = 'This ride just hit different in ' + locationCity + ' \uD83D\uDE97\uD83D\uDD25\n\n' + desc + ' \u2014 if you are looking for the best car deals, you already know where to find us!';
+      caption = 'This ride just hit different in ' + locationCity + ' \uD83D\uDE97\uD83D\uDD25\n\n' + desc + ' \u2014 if you are looking for the best car deals, you know where to find us!';
     } else if (videoType === 'Comedy skit') {
-      caption = locationCity + ' people will understand this immediately \uD83D\uDE02\uD83D\uDE2D\n\n' + desc + ' \u2014 Tag someone who has been in this exact situation! The accuracy is too much abeg.';
+      caption = locationCity + ' people will understand this immediately \uD83D\uDE02\uD83D\uDE2D\n\n' + desc + ' \u2014 Tag someone who has been in this exact situation!';
     } else if (videoType === 'Dance video') {
       caption = 'This dance is taking over ' + locationCity + ' \uD83D\uDD7A\uD83D\uDD25\n\n' + desc + ' \u2014 Drop a \uD83D\uDD25 if you can do this!';
     } else {
-      caption = desc + ' \uD83D\uDE80\n\n' + niche + ' content from ' + locationCity + ' that you did not know you needed. Save this and thank me later!';
+      caption = desc + ' \uD83D\uDE80\n\n' + niche + ' content from ' + locationCity + ' that you did not know you needed. Save this!';
     }
 
     hashtags = '#' + niche.replace(/\s+/g,'') + ' #' + locationCity.replace(/\s+/g,'') + ' #' + platformTag + ' #NigerianCreator #Blowva #GoViral #' + videoType.replace(/\s+/g,'') + ' #NaijaContent #AfricanCreator #ContentCreator #Nigeria';
