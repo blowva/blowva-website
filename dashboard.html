@@ -625,6 +625,48 @@ nav{
       </div>
     </div>
 
+    <!-- VIDEO UPLOAD SECTION -->
+<div class="ai-box" id="upload-section">
+  <div class="ai-box-header">
+    <div class="ai-badge">UPLOAD</div>
+    <div class="ai-box-title">Upload your video</div>
+  </div>
+
+  <form id="upload-form" onsubmit="return handleVideoUpload(event)">
+    <div class="ai-field">
+      <div class="ai-field-label">Select platform<span class="req">*</span></div>
+      <select class="ai-select" id="upload-platform" required>
+        <option value="" disabled selected>Select platform</option>
+        <option value="tiktok">TikTok</option>
+        <option value="instagram">Instagram</option>
+        <option value="facebook">Facebook</option>
+      </select>
+    </div>
+
+    <div class="ai-field" style="margin-top:10px;">
+      <div class="ai-field-label">Select niche<span class="req">*</span></div>
+      <input class="ai-input" type="text" id="upload-niche" placeholder="e.g. Comedy, Fashion, Music" required>
+    </div>
+
+    <div class="ai-field" style="margin-top:10px;">
+      <div class="ai-field-label">Upload video file<span class="req">*</span></div>
+      <input type="file" id="video-file" accept="video/mp4,video/quicktime,video/x-m4v" style="display:block;padding:1rem 0;" required>
+      <small style="font-size:0.75rem;color:var(--muted2)">Max file size: 500MB</small>
+    </div>
+
+    <button class="btn-generate" style="width:100%;margin-top:20px;">Upload video &rarr;</button>
+  </form>
+
+  <!-- Progress + Caption Review -->
+  <div id="upload-status" style="display:none;margin-top:10px;font-size:0.85rem;color:var(--muted);"></div>
+
+  <div class="ai-result" id="upload-caption-box" style="margin-top:15px;">
+    <div class="ai-result-label">Suggested caption (AI)</div>
+    <textarea id="upload-caption" class="ai-input" style="width:100%;height:100px;resize:vertical;"></textarea>
+    <button class="btn-generate" style="margin-top:10px;" onclick="approveAndSchedule()">Approve & Schedule</button>
+  </div>
+</div>
+
     <!-- CONNECT PLATFORMS -->
     <div class="sec-title" id="platforms-section">Connect your social accounts</div>
     <div class="platforms-grid">
