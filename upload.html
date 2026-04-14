@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Video - Blowva</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --green: #00B859;
+    --green-dark: #009947;
+    --black: #080F09;
+    --white: #FFFFFF;
+    --gray: #6B7280;
+    --light-gray: #F3F4F6;
+    --border: #E5E7EB;
+    --bg: #FFFFFF;
+    --text: #080F09;
+    --card-bg: #FFFFFF;
+  }
+  [data-theme="dark"] {
+    --bg: #080F09;
+    --text: #FFFFFF;
+    --card-bg: #111811;
+    --light-gray: #1A201B;
+    --border: #2A302B;
+    --gray: #9CA3AF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+  }
+  /* HEADER */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--text);
+  }
+  .hamburger svg { width: 28px; height: 28px; }
+
+  /* DRAWER */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 200;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+  .drawer {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100%;
+    background: var(--bg);
+    z-index: 201;
+    transition: left 0.3s ease;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .drawer.open { left: 0; }
+  .drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  .drawer-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 24px;
+  }
+  .drawer-link {
+    display: block;
+    padding: 14px 12px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .drawer-link:hover { background: var(--light-gray); }
+  .drawer-link.active { background: var(--green); color: white; }
+  .theme-toggle {
+    margin-top: 20px;
+    padding: 14px 12px;
+    background: var(--light-gray);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  .page-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .page-subtitle {
+    color: var(--gray);
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+
+  /* DROPZONE */
+  .dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 60px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--card-bg);
+  }
+  .dropzone:hover, .dropzone.dragover {
+    border-color: var(--green);
+    background: rgba(0, 184, 89, 0.05);
+  }
+  .dropzone-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 36px;
+  }
+  .dropzone-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .dropzone-text {
+    color: var(--gray);
+    font-size: 14px;
+  }
+  #fileInput { display: none; }
+
+  /* PREVIEW */
+  .preview-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+    display: none;
+  }
+  .preview-card.show { display: block; }
+  video {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    background: black;
+  }
+  .file-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .file-info:last-child { border-bottom: none; }
+  .file-info span:first-child { color: var(--gray); }
+  .file-info span:last-child { font-weight: 600; }
+  .remove-btn {
+    background: none;
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 8px;
+    color: var(--text);
+    cursor: pointer;
+    margin-top: 12px;
+    font-family: inherit;
+    width: 100%;
+  }
+
+  /* FORM */
+  .form-group {
+    margin-top: 24px;
+  }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  select, input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    background: var(--card-bg);
+    color: var(--text);
+  }
+  select:focus, input:focus {
+    outline: none;
+    border-color: var(--green);
+  }
+
+  /* BUTTONS */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.2s;
+  }
+  .btn:hover { background: var(--green-dark); }
+  .btn:disabled {
+    background: var(--gray);
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* PROGRESS */
+  .progress-container {
+    margin-top: 20px;
+    display: none;
+  }
+  .progress-container.show { display: block; }
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--light-gray);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    width: 0%;
+    transition: width 0.3s;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 8px;
+  }
+
+  /* SUCCESS MESSAGE */
+  .success-card {
+    background: rgba(0, 184, 89, 0.1);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 24px;
+    display: none;
+    text-align: center;
+  }
+  .success-card.show { display: block; }
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    color: white;
+    font-size: 28px;
+  }
+  .success-title {
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  .success-text {
+    color: var(--gray);
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .error-msg {
+    background: #FEE2E2;
+    color: #991B1B;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 14px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="dashboard.html" class="logo">
+    <div class="logo-icon">▶</div>
+    <div class="logo-text">Blowva</div>
+  </a>
+  <button class="hamburger" onclick="openDrawer()">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+</header>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="logo">
+      <div class="logo-icon">▶</div>
+      <div class="logo-text">Blowva</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <a href="dashboard.html" class="drawer-link">Dashboard</a>
+  <a href="upload.html" class="drawer-link active">Upload Video</a>
+  <a href="dashboard.html#captions" class="drawer-link">AI Captions</a>
+  <a href="privacy.html" class="drawer-link">Privacy Policy</a>
+  <a href="terms.html" class="drawer-link">Terms of Service</a>
+  <a href="#" class="drawer-link" onclick="logout()">Logout</a>
+  <div class="theme-toggle" onclick="toggleTheme()">
+    <span>Dark Mode</span>
+    <span id="themeIcon">🌙</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+  <h1 class="page-title">Upload Your Video</h1>
+  <p class="page-subtitle">Drop your video below and let Blowva AI analyze top performers in your niche to give you a winning strategy.</p>
+
+  <!-- DROPZONE -->
+  <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+    <div class="dropzone-icon">↑</div>
+    <div class="dropzone-title">Drag & drop your video here</div>
+    <div class="dropzone-text">or click to browse · MP4, MOV, AVI, WebM · Max 50MB</div>
+  </div>
+  <input type="file" id="fileInput" accept="video/mp4,video/quicktime,video/x-msvideo,video/webm">
+
+  <!-- PREVIEW -->
+  <div class="preview-card" id="previewCard">
+    <video id="videoPreview" controls></video>
+    <div class="file-info">
+      <span>File name</span>
+      <span id="fileName">-</span>
+    </div>
+    <div class="file-info">
+      <span>File size</span>
+      <span id="fileSize">-</span>
+    </div>
+    <button class="remove-btn" onclick="removeFile()">Remove video</button>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-group">
+    <label for="niche">Select your niche for this video</label>
+    <select id="niche">
+      <option value="">Choose a niche...</option>
+      <option value="Comedy & Entertainment">Comedy & Entertainment</option>
+      <option value="Music & Dance">Music & Dance</option>
+      <option value="Fashion & Beauty">Fashion & Beauty</option>
+      <option value="Food & Cooking">Food & Cooking</option>
+      <option value="Lifestyle & Vlog">Lifestyle & Vlog</option>
+      <option value="Education & How-To">Education & How-To</option>
+      <option value="Fitness & Health">Fitness & Health</option>
+      <option value="Tech & Gadgets">Tech & Gadgets</option>
+      <option value="Business & Finance">Business & Finance</option>
+      <option value="Sports">Sports</option>
+      <option value="Gaming">Gaming</option>
+      <option value="News & Politics">News & Politics</option>
+      <option value="Travel">Travel</option>
+      <option value="Relationships">Relationships</option>
+      <option value="Religion & Faith">Religion & Faith</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="platform">Target platform</label>
+    <select id="platform">
+      <option value="">Choose a platform...</option>
+      <option value="TikTok">TikTok</option>
+      <option value="Instagram">Instagram Reels</option>
+      <option value="Facebook">Facebook Reels</option>
+    </select>
+  </div>
+
+  <button class="btn" id="uploadBtn" onclick="uploadVideo()" disabled>Upload Video</button>
+
+  <!-- PROGRESS -->
+  <div class="progress-container" id="progressContainer">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Uploading... 0%</div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- SUCCESS -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Video uploaded successfully!</div>
+    <div class="success-text">Your video is ready. Click below to start the AI analysis.</div>
+    <button class="btn" onclick="analyzeVideo()">Analyze Video</button>
+  </div>
+</main>
+
+<script>
+  // SUPABASE INIT
+  const SUPABASE_URL = 'https://btfgjsivlwpmshgaqnub.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0Zmdqc2l2bHdwbXNoZ2FxbnViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjM2NjgsImV4cCI6MjA5MDYzOTY2OH0.PpST21uPsFn7y3prTVVrhZcDaPv_qzFtMz4GqNjAPiU';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let selectedFile = null;
+  let currentUser = null;
+  let uploadedRecordId = null;
+
+  // CHECK AUTH ON LOAD
+  (async function checkAuth() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+  })();
+
+  // DRAWER
+  window.openDrawer = function() {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+  };
+  window.closeDrawer = function() {
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+  };
+
+  // THEME
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+  }
+  window.toggleTheme = toggleTheme;
+
+  // LOGOUT
+  window.logout = async function() {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  };
+
+  // FILE HANDLING
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  dropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropzone.classList.add('dragover');
+  });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+
+  function handleFile(file) {
+    // Validate type
+    const allowed = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+    if (!allowed.includes(file.type)) {
+      showError('Please upload a valid video file (MP4, MOV, AVI, or WebM).');
+      return;
+    }
+    // Validate size (50MB)
+    if (file.size > 52428800) {
+      showError('File is too large. Maximum size is 50MB.');
+      return;
+    }
+
+    hideError();
+    selectedFile = file;
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = formatBytes(file.size);
+    document.getElementById('videoPreview').src = URL.createObjectURL(file);
+    document.getElementById('previewCard').classList.add('show');
+    document.getElementById('uploadBtn').disabled = false;
+  }
+
+  function removeFile() {
+    selectedFile = null;
+    fileInput.value = '';
+    document.getElementById('previewCard').classList.remove('show');
+    document.getElementById('uploadBtn').disabled = true;
+    document.getElementById('successCard').classList.remove('show');
+  }
+  window.removeFile = removeFile;
+
+  function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(2) + ' MB';
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+  function hideError() {
+    document.getElementById('errorMsg').classList.remove('show');
+  }
+
+  // UPLOAD
+  async function uploadVideo() {
+    if (!selectedFile) return showError('Please select a video first.');
+    const niche = document.getElementById('niche').value;
+    const platform = document.getElementById('platform').value;
+    if (!niche) return showError('Please select a niche.');
+    if (!platform) return showError('Please select a target platform.');
+
+    const btn = document.getElementById('uploadBtn');
+    btn.disabled = true;
+    btn.textContent = 'Uploading...';
+    document.getElementById('progressContainer').classList.add('show');
+
+    try {
+      // Build file path: userId/timestamp_filename
+      const timestamp = Date.now();
+      const cleanName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${currentUser.id}/${timestamp}_${cleanName}`;
+
+      // Simulate progress (Supabase JS v2 doesn't expose true progress easily)
+      let fakeProgress = 0;
+      const progressInterval = setInterval(() => {
+        fakeProgress += 5;
+        if (fakeProgress > 90) fakeProgress = 90;
+        updateProgress(fakeProgress);
+      }, 300);
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('user-videos')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: selectedFile.type
+        });
+
+      clearInterval(progressInterval);
+
+      if (error) throw error;
+
+      updateProgress(100);
+
+      // Save record to user_uploads table
+      const { data: record, error: dbError } = await supabase
+        .from('user_uploads')
+        .insert({
+          user_id: currentUser.id,
+          file_name: selectedFile.name,
+          file_path: filePath,
+          file_size: selectedFile.size,
+          niche: niche,
+          platform: platform,
+          status: 'uploaded'
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      uploadedRecordId = record.id;
+
+      // Show success
+      document.getElementById('successCard').classList.add('show');
+      btn.style.display = 'none';
+      document.getElementById('progressContainer').classList.remove('show');
+
+    } catch (err) {
+      console.error('Upload error:', err);
+      showError('Upload failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Upload Video';
+      document.getElementById('progressContainer').classList.remove('show');
+    }
+  }
+  window.uploadVideo = uploadVideo;
+
+  function updateProgress(percent) {
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressText').textContent = `Uploading... ${percent}%`;
+  }
+
+  // ANALYZE (placeholder for next build)
+  function analyzeVideo() {
+    if (!uploadedRecordId) return;
+    // For now, redirect to a placeholder. We'll build the analysis page next.
+    window.location.href = `analyze.html?id=${uploadedRecordId}`;
+  }
+  window.analyzeVideo = analyzeVideo;
+</script>
+</body>
+</html>
